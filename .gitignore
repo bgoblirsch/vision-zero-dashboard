@@ -1,0 +1,60 @@
+# ======================
+# Python / Virtualenv
+# ======================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+.dist-info/
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+conda-env/
+miniconda*/
+
+# ======================
+# OS / Editor noise
+# ======================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ======================
+# Logs
+# ======================
+*.log
+logs/
+
+# ======================
+# Environment variables / secrets
+# ======================
+.env
+.env.*
+*.env
+
+# ======================
+# Data (CRITICAL)
+# ======================
+data/
+raw_data/
+*.zip
+*.csv
+
+# ======================
+# Database artifacts
+# ======================
+*.sqlite
+*.db
+
+# ======================
+# Test / coverage artifacts
+# ======================
+.coverage
+htmlcov/
+.pytest_cache/
