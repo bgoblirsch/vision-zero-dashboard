@@ -189,7 +189,7 @@ def load_fars_rows(
             error_count += 1
             batch_errors += 1
             logger.exception(
-                f"[FARS_{file_year}] Failed to insert row {idx} "
+                f"[FARS] {file_year} | Failed to insert row {idx} "
                 f"(ST_CASE={row.get('ST_CASE')})"
             )
         else:
@@ -217,7 +217,7 @@ def load_fars_year(file_path: Path, year: int) -> tuple[int, int, int]:
     Load a single FARS CSV file into the database.
     """
     start = time.time()
-    logger.info(f"[FARS_{year}] Loading {file_path.name}")
+    logger.info(f"[FARS] Loading {year} {file_path.name}")
 
     try:
         with open(
@@ -232,12 +232,12 @@ def load_fars_year(file_path: Path, year: int) -> tuple[int, int, int]:
                 insert_count, skip_count, error_count = load_fars_rows(conn=conn, reader=reader, file_year=year)
                 conn.commit()
     except Exception as e:
-        logger.error(f"[FARS_{year}] Load failed: {e}")
+        logger.error(f"[FARS] {year} load failed: {e}")
         raise
     else:
         elapsed = time.time() - start
         logger.info(
-            f"[FARS_{year}] Completed loading. "
+            f"[FARS] Completed loading {year}. "
             f"Inserted={insert_count}, skipped={skip_count}, errors={error_count}, "
             f"duration={elapsed:.2f}s"
         )

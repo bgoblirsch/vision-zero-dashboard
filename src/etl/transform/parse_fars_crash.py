@@ -94,9 +94,11 @@ def parse_fars_date(row: dict) -> date | None:
         year = int(row["YEAR"])
         month = int(row["MONTH"])
         day = int(row["DAY"])
-
-        if month <= 0 or day <= 0:
+        if year <= 0 or month <= 0 or day <= 0:
             return None
+        
+        if year < 100 and year > 23:
+            year += 1900
 
         return date(year, month, day)
     except (ValueError, TypeError):

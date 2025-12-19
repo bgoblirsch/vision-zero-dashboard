@@ -35,7 +35,8 @@ def run_fars_pipeline(
                 total_inserted += insert_count
                 total_skipped += skip_count
                 total_errors += error_count
-                years_processed += 1
+        
+        years_processed += 1
 
     elapsed = time.time() - start
     logger.info("[PIPELINE][FARS] Summary: years=%s | inserted=%s | skipped=%s | errors=%s | duration=%.2fs",
@@ -46,28 +47,3 @@ def run_fars_pipeline(
                 elapsed,
     )
     logger.info("[PIPELINE][FARS] Pipeline completed succesfully")
-
-if __name__ == "__main__":
-    import argparse
-    from pathlib import Path
-
-    parser = argparse.ArgumentParser(description="Run FARS pipeline")
-    parser.add_argument(
-        "--raw-root",
-        type=Path,
-        default=Path("data/raw/fars"),
-        help="Root directory for raw FARS data",
-    )
-    parser.add_argument(
-        "--years",
-        type=int,
-        nargs="*",
-        help="Specific years to process (e.g. 2023 2022)",
-    )
-
-    args = parser.parse_args()
-
-    run_fars_pipeline(
-        raw_root=args.raw_root,
-        requested_years=args.years,
-    )
