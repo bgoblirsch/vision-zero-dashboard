@@ -71,10 +71,6 @@ This repository currently focuses on building a reliable, historically aware ETL
 
 ## Pipeline Architecture
 
-Absolutely — here is the raw Markdown for the Pipeline Architecture section, ready to paste directly into your README:
-
-## Pipeline Architecture
-
 The pipeline is structured around a **decoupled Extract → Transform/Load (E→TL)** design to accommodate historical inconsistencies in FARS data while remaining idempotent and easy to re-run.
 
 ### Why Extract → Transform/Load (E→TL)?
