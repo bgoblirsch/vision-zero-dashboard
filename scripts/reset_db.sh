@@ -16,7 +16,7 @@ echo
 echo " ⚠️  WARNING: DATABASE RESET"
 echo "-----------------------------"
 echo "This will:"
-echo "  - DROP the accidents tabl"
+echo "  - DROP the crashes table"
 echo "  - DELETE all ingested FARS data"
 echo
 echo "This action is IRREVERSIBLE."
@@ -30,6 +30,7 @@ if [[ "$CONFIRM" != "RESET" ]]; then
   exit 1
 fi
 
-psql -U visionzero -d visionzero_db -f schema/drop_accidents.sql
+psql -U visionzero -d visionzero_db -f schema/drop_clean_tables.sql
 psql -U visionzero -d visionzero_db -f schema/extensions.sql
-psql -U visionzero -d visionzero_db -f schema/accidents.sql
+psql -U visionzero -d visionzero_db -f schema/fars_crashes_clean.sql
+psql -U visionzero -d visionzero_db -f schema/fars_persons_clean.sql

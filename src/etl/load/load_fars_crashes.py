@@ -8,19 +8,19 @@ from psycopg import Connection
 from logger import get_logger
 from db.connection import get_conn
 from etl.transform.parse_fars_crash import parse_fars_date, parse_fars_point
-from etl.transform.parse_fars_crash import map_route_to_road_type
+from etl.transform.parse_fars_crash import map_route_to_road_label
 
 logger = get_logger(__name__)
 
 BATCH_SIZE: int = 5000
 
-YEAR_RE = re.compile(r"(19|20)\d{2}")
+YEAR_REGEX = re.compile(r"(19|20)\d{2}")
 
 def count_peds(person_rows) -> int:
     '''
     Stub fns for counting number of fatality types in each FARS case.
     
-    :param person_rows: person table joined to accident table
+    :param person_rows: person table joined to crashes table
     :return: Number of pedestrian fatalities for a particular FARS case.
     :rtype: int
     '''
@@ -42,75 +42,69 @@ def open_csv_with_fallback(path: Path):
         )
         return open(path, newline="", encoding="latin-1")
 
-def assemble_fars_case(
+def assemble_fars_crash(
         crash_row: dict,
-        person_rows: list[dict],
         file_year: int,
 ) -> dict:
     lon, lat = parse_fars_point(crash_row)
-    road_type = map_route_to_road_type(crash_row.get("ROUTE"))
+    route_code = int(crash_row.get("ROUTE", 9))
+    road_label = map_route_to_road_label(route_code)
     crash_date = parse_fars_date(crash_row)
 
     return {
         "st_case": crash_row["ST_CASE"],
         "year": file_year,
-        "accident_date": crash_date,
+        "crash_date": crash_date,
         "state": int(crash_row["STATE"]),
         "state_name": crash_row.get("STATENAME"),
         "county": int(crash_row["COUNTY"]),
         "county_name": crash_row.get("COUNTYNAME"),
         "city": int(crash_row["CITY"]),
         "city_name": crash_row.get("CITYNAME"),
-        "road_type": road_type,
+        "route_code": route_code,
+        "road_label": road_label,
         "total_fatalities": int(crash_row.get("FATALS", 0)),
-        "pedestrian_fatalities": count_peds(person_rows),
-        "cyclist_fatalities": count_cyclists(person_rows),
-        "motorist_fatalities": count_motorists(person_rows),
         "lat": lat,
         "lon": lon,
     }
 
-def insert_fars_accident(conn: Connection, record: dict) -> bool:
+def insert_fars_crash(conn: Connection, record: dict) -> bool:
     """
-    Inserts a single row from a FARS CSV into the accidents table.
+    Inserts a single row from a FARS CSV into the crashes table.
     Parameters:
-        record (dict): a dictionary representing one row from the accident csv, 
+        record (dict): a dictionary representing one row from the accidents csv, 
                        with minor transformations applied. Ready for insertion into DB.
     """
 
     insert_query = sql.SQL("""
-        INSERT INTO accidents (
+        INSERT INTO fars_crashes_clean (
             st_case, 
             year,
-            accident_date, 
+            crash_date, 
             state, 
             state_name,
             county,
             county_name,
             city,
             city_name,
-            road_type, 
+            route_code,
+            road_label, 
             total_fatalities, 
-            motorist_fatalities, 
-            cyclist_fatalities, 
-            pedestrian_fatalities, 
             location
         )
         VALUES (
             %(st_case)s,
             %(year)s,
-            %(accident_date)s, 
+            %(crash_date)s, 
             %(state)s, 
             %(state_name)s,
             %(county)s,
             %(county_name)s,
             %(city)s,
             %(city_name)s,
-            %(road_type)s,
+            %(route_code)s,
+            %(road_label)s,
             %(total_fatalities)s,
-            %(motorist_fatalities)s,
-            %(cyclist_fatalities)s,
-            %(pedestrian_fatalities)s,
             CASE
                 WHEN %(lon)s::double precision IS NULL 
                   OR %(lat)s::double precision IS NULL
@@ -145,13 +139,13 @@ def extract_year_from_path(file_path: Path) -> int:
     :return: Description
     :rtype: int
     '''
-    match = YEAR_RE.search(file_path.name)
+    match = YEAR_REGEX.search(file_path.name)
     if not match:
         raise ValueError(f"Could not determine year from filename: {file_path.name}")
     return int(match.group())
 
 
-def load_fars_rows(
+def load_fars_crash_rows(
         conn: Connection, 
         reader: csv.DictReader, 
         file_year: int
@@ -174,13 +168,12 @@ def load_fars_rows(
 
     for idx, row in enumerate(reader, start=1):
         batch_processed += 1
-        record = assemble_fars_case(
+        record = assemble_fars_crash(
                     file_year=file_year,
                     crash_row=row,
-                    person_rows = [], #MVP stub !!!
         )
         try:
-            inserted = insert_fars_accident(conn, record)
+            inserted = insert_fars_crash(conn, record)
         except Exception:
             conn.rollback()
             for key, value in record.items():
@@ -212,7 +205,7 @@ def load_fars_rows(
     return insert_count, skip_count, error_count
 
 
-def load_fars_year(file_path: Path, year: int) -> tuple[int, int, int]:
+def load_fars_crash_year(file_path: Path, year: int) -> tuple[int, int, int]:
     """
     Load a single FARS CSV file into the database.
     """
@@ -229,7 +222,7 @@ def load_fars_year(file_path: Path, year: int) -> tuple[int, int, int]:
             reader = csv.DictReader(csvfile)
 
             with get_conn() as conn:
-                insert_count, skip_count, error_count = load_fars_rows(conn=conn, reader=reader, file_year=year)
+                insert_count, skip_count, error_count = load_fars_crash_rows(conn=conn, reader=reader, file_year=year)
                 conn.commit()
     except Exception as e:
         logger.error(f"[FARS] {year} load failed: {e}")
