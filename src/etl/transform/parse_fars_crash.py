@@ -18,7 +18,7 @@ ROUTE_MAP = {
 }
 
 
-def map_route_to_road_type(raw_value: str | int | None) -> str:
+def map_route_to_road_label(raw_value: str | int | None) -> str:
     """
     Convert FARS ROUTE code into human-readable road_type string.
     Unknown, None, or invalid codes return "Unknown".
@@ -65,7 +65,7 @@ def parse_fars_point(row: dict) -> tuple[float, float] | tuple[None, None]:
     except ValueError:
         return None, None
 
-    # -- Sanity checks --
+    # -- Spatial Sanity checks --
     if not (-90 <= lat <= 90):
         return None, None
 

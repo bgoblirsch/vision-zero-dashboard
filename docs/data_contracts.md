@@ -8,7 +8,7 @@ The purpose of these contracts is to ensure downstream analyses, dashboards, and
 
 ## Scope
 
-These contracts apply to the **`accidents`** table populated from the U.S. Fatality Analysis Reporting System (FARS), covering data from **1987 to present**.
+These contracts apply to the **`crashes`** table populated from the U.S. Fatality Analysis Reporting System (FARS), covering data from **1987 to present**.
 
 They describe:
 - Structural guarantees (schema, keys)
@@ -17,7 +17,7 @@ They describe:
 
 ---
 
-## Core Entity: `accidents`
+## Core Entity: `crashes`
 
 Each row represents a single fatal crash case as defined by FARS.
 
@@ -30,7 +30,7 @@ Each row represents a single fatal crash case as defined by FARS.
 
 - **`year`** (INTEGER, NOT NULL)  
   Calendar year of the crash.  
-  Always derived from the dataset year and never inferred solely from the accident date.
+  Always derived from the dataset year and never inferred solely from the crash date.
 
 ### Uniqueness Guarantee
 
@@ -41,17 +41,17 @@ The following invariant is enforced at the database level:
 
 ## Temporal Fields
 
-- **`accident_date`** (DATE, nullable)
+- **`crash_date`** (DATE, nullable)
 
 ### Guarantees
 
-- If present, `accident_date` falls between `1987-01-01` and `2023-12-31`
+- If present, `crash_date` falls between `1987-01-01` and `2023-12-31`
 - Some early FARS years contain partial or invalid date components
 - In such cases:
   - `year` is always populated
-  - `accident_date` may be NULL
+  - `crash_date` may be NULL
 
-Downstream consumers should prefer `year` for temporal aggregation and treat `accident_date` as optional.
+Downstream consumers should prefer `year` for temporal aggregation and treat `crash_date` as optional.
 
 ---
 
@@ -117,7 +117,7 @@ The following checks are **blocking** and will fail the pipeline if violated:
 
 - Duplicate `(st_case, year)` records
 - Missing required identifiers (`st_case`, `year`, `state`)
-- Accident dates outside the supported range
+- Crash dates outside the supported range
 - Fatality totals that do not equal the sum of subtype counts
 - Implausible fatality counts
 

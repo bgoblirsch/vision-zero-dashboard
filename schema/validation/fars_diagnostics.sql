@@ -17,7 +17,7 @@
 \echo 
 
 SELECT st_case, year, COUNT(*) 
-FROM accidents 
+FROM fars_crashes_clean 
 GROUP BY st_case, year 
 HAVING COUNT(*) > 1;
 
@@ -31,7 +31,7 @@ SELECT
     COUNT(*) FILTER (WHERE year IS NULL) AS missing_year,
     COUNT(*) FILTER (WHERE state IS NULL) AS missing_state,
     COUNT(*) FILTER (WHERE st_case IS NULL) AS missing_case 
-FROM accidents;
+FROM fars_crashes_clean;
 
 \echo '-----------------------------'
 \echo 'Dates outside expected range:'
@@ -43,20 +43,35 @@ SELECT
     year,
     COUNT(*) AS total_records,
     COUNT(*) AS bad_dates
-FROM accidents
-WHERE accident_date IS NOT NULL
+FROM fars_crashes_clean
+WHERE crash_date IS NOT NULL
   AND (
-      accident_date < DATE '1987-01-01'
-      OR accident_date > '2023-12-31'
+      crash_date < DATE '1987-01-01'
+      OR crash_date > '2023-12-31'
   )
 GROUP BY year
 ORDER BY year;
 
-\echo '-----------------------'
-\echo 'Negative Fatality Check'
-\echo '-----------------------'
-\echo 'blocking check (diagnostic not implemented)'
+\echo '--------------------------------------'
+\echo 'Negative Fatality Check; expect 0 rows'
+\echo '--------------------------------------'
+\echo 'blocking check'
 \echo 
+
+-- SELECT  !!! TODO !!! fatality logic not implemented yet.
+--     st_case, 
+--     year, 
+--     total_fatalities, 
+--     motorist_fatalities, 
+--     cyclist_fatalities, 
+--     pedestrian_fatalities
+-- FROM fars_crashes_clean
+-- WHERE
+--   total_fatalities < 0 OR
+--   motorist_fatalities < 0 OR
+--   cyclist_fatalities < 0 OR
+--   pedestrian_fatalities < 0
+-- LIMIT 10;
 
 \echo '------------------'
 \echo 'Fatality Sum Check'
@@ -64,12 +79,23 @@ ORDER BY year;
 \echo 'blocking check (diagnostic not implemented)'
 \echo 
 
-\echo '------------------'
-\echo 'Max Fatality Check'
-\echo '------------------'
-\echo 'blocking check (diagnostic not implemented)'
+\echo '-------------------------------------------------'
+\echo 'Max Fatality Check (no crash > 30); expect 0 rows'
+\echo '-------------------------------------------------'
+\echo 'blocking check'
 \echo 
 
+-- SELECT  !!! TODO !!! fatality logic not implemented yet.
+--     st_case, 
+--     year, 
+--     total_fatalities, 
+--     motorist_fatalities, 
+--     cyclist_fatalities, 
+--     pedestrian_fatalities
+-- FROM fars_crashes_clean
+-- WHERE
+--   total_fatalities > 30
+-- LIMIT 10;
 
 -- !!! To-Do !!!
 
@@ -88,55 +114,55 @@ ORDER BY year;
 SELECT
   year,
   COUNT(*) AS crashes
-FROM accidents
+FROM fars_crashes_clean
 GROUP BY year
 ORDER BY year;
 
-\echo '---------------------------------------------------'
-\echo 'Total FARS crashes. expect ~1 million for 1987-2023'
-\echo '---------------------------------------------------'
+\echo '-----------------------------------------------------'
+\echo 'Total FARS crashes. expect ~1.3 million for 1987-2023'
+\echo '-----------------------------------------------------'
 \echo 
 
 SELECT COUNT(*)
-FROM accidents;
+FROM fars_crashes_clean;
 
 \echo '----------------------------'
 \echo 'annual fatality distribution'
 \echo '----------------------------'
 \echo 
 
-SELECT
-    year,
-    SUM(total_fatalities) AS total,
-    SUM(pedestrian_fatalities) AS peds,
-    SUM(cyclist_fatalities) AS cyclists,
-    SUM(motorist_fatalities) AS motorists
-FROM accidents
-GROUP BY year
-ORDER BY year;
+-- SELECT !!! TODO !!! fatality logic not implemented yet.
+--     year,
+--     SUM(total_fatalities) AS total,
+--     SUM(pedestrian_fatalities) AS peds,
+--     SUM(cyclist_fatalities) AS cyclists,
+--     SUM(motorist_fatalities) AS motorists
+-- FROM fars_crashes_clean
+-- GROUP BY year
+-- ORDER BY year;
 
-\echo '----------------------------------------'
-\echo 'Year and file_year match check; expect 0'
-\echo '----------------------------------------'
+\echo '-----------------------------'
+\echo 'Invalid State Codes; expect 0'
+\echo '-----------------------------'
+\echo
+
+SELECT DISTINCT state
+FROM fars_crashes_clean
+WHERE state NOT BETWEEN 1 AND 56;
+
+\echo '-----------------------------------------'
+\echo 'Ensure year and file_year match; expect 0'
+\echo '-----------------------------------------'
 \echo 
 
 SELECT
     year,
     COUNT(*) AS mismatches
-FROM accidents
-WHERE accident_date IS NOT NULL
-  AND EXTRACT(YEAR FROM accident_date) <> year
+FROM fars_crashes_clean
+WHERE crash_date IS NOT NULL
+  AND EXTRACT(YEAR FROM crash_date) <> year
 GROUP BY year
 ORDER BY year;
-
-\echo '------------------------------'
-\echo 'Invalide State Codes; expect 0'
-\echo '------------------------------'
-\echo
-
-SELECT DISTINCT state
-FROM accidents
-WHERE state NOT BETWEEN 1 AND 56;
 
 \echo '---------------------------'
 \echo 'Spatial & Date Completeness' 
@@ -146,9 +172,9 @@ WHERE state NOT BETWEEN 1 AND 56;
 SELECT
     year,
     COUNT(*)                         AS total,
-    COUNT(*) - COUNT(accident_date)  AS missing_date,
+    COUNT(*) - COUNT(crash_date)  AS missing_date,
     COUNT(*) - COUNT(location)       AS missing_geometry
-FROM accidents
+FROM fars_crashes_clean
 GROUP BY year
 ORDER BY year;
 
@@ -158,10 +184,13 @@ ORDER BY year;
 \echo 
 
 SELECT COUNT(*) AS invalid_points
-FROM accidents
+FROM fars_crashes_clean
 WHERE location IS NOT NULL
   AND NOT (
       ST_X(location) BETWEEN -180 AND 180
   AND ST_Y(location) BETWEEN -90 AND 90
   );
 
+\echo '====================='
+\echo 'Diagnostics complete.'
+\echo '====================='

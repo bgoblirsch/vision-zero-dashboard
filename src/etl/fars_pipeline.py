@@ -3,7 +3,8 @@ from pathlib import Path
 
 from etl.extract.fars.extract_fars import download_unzip_fars_year
 from etl.extract.fars.ingest_plan_fars import resolve_target_fars_years
-from etl.load.load_fars import load_fars_year
+from etl.load.load_fars_crashes import load_fars_crash_year
+from etl.load.load_fars_persons import load_fars_person_year
 from logger import get_logger
 
 logger = get_logger(__name__)
@@ -23,20 +24,47 @@ def run_fars_pipeline(
     total_skipped = 0
     total_errors = 0
     years_processed = 0
+    ingestion_stats = {
+        "crashes": {"inserted": 0, "skipped": 0, "errors": 0},
+        "persons": {"inserted": 0, "skipped": 0, "errors": 0},
+    }
 
     years = resolve_target_fars_years(requested_years)
 
     for year in years:
         csv_paths = download_unzip_fars_year(year, raw_root)
 
-        for csv_path in csv_paths:
-            if csv_path.name.upper() == "ACCIDENT.CSV":
-                insert_count, skip_count, error_count = load_fars_year(csv_path, year)
-                total_inserted += insert_count
-                total_skipped += skip_count
-                total_errors += error_count
+        files = {path.name.upper(): path for path in csv_paths}
+
+        if "ACCIDENT.CSV" in files:
+            insert_count, skip_count, error_count = load_fars_crash_year(
+                files["ACCIDENT.CSV"], year
+            )
+            ingestion_stats["crashes"]["inserted"] += insert_count
+            ingestion_stats["crashes"]["skipped"] += skip_count
+            ingestion_stats["crashes"]["errors"] += error_count
+        else:
+            logger.error(f"[FARS] {year} missing ACCIDENT.CSV")
+            ingestion_stats["crashes"]["errors"] += 1
+            continue
+
+        if "PERSON.CSV" in files:
+            insert_count, skip_count, error_count = load_fars_person_year(
+                files["PERSON.CSV"], year
+            )
+            ingestion_stats["persons"]["inserted"] += insert_count
+            ingestion_stats["persons"]["skipped"] += skip_count
+            ingestion_stats["persons"]["errors"] += error_count
+        else:
+            logger.error(f"[FARS] {year} missing PERSON.CSV")
+            ingestion_stats["persons"]["errors"] += 1
+            continue
         
         years_processed += 1
+
+    total_inserted = sum(v["inserted"] for v in ingestion_stats.values())
+    total_skipped  = sum(v["skipped"] for v in ingestion_stats.values())
+    total_errors   = sum(v["errors"] for v in ingestion_stats.values())
 
     elapsed = time.time() - start
     logger.info("[PIPELINE][FARS] Summary: years=%s | inserted=%s | skipped=%s | errors=%s | duration=%.2fs",

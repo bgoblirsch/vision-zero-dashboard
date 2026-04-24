@@ -39,7 +39,7 @@ def main() -> None:
 
     if args.validate_only:
         run_fars_validation()
-        logger.info("[PIPELINE][FARS] Validation Completed.")
+        logger.info("[PIPELINE][FARS] Validation Completed. Passed all blocking checks.")
         return
 
     run_fars_pipeline(
