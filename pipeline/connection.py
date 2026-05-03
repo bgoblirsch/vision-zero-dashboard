@@ -1,7 +1,7 @@
 import os
 import psycopg
 from contextlib import contextmanager
-from logger import get_logger
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -3,8 +3,8 @@ import time
 from pathlib import Path
 from psycopg import Connection
 
-from logger import get_logger
-from db.connection import get_conn
+from pipeline.logger import get_logger
+from pipeline.connection import get_conn
 
 logger = get_logger(__name__)
 
@@ -18,6 +18,8 @@ def assemble_fars_person(
     return {
         "crash_id": crash_id,
         "crash_year": file_year,
+        "vehicle_number": int(person_row["VEH_NO"]),
+        "person_number": int(person_row["PER_NO"]),
         "person_age": int(person_row["AGE"]),
         "sex": int(person_row["SEX"]),
         "person_type": int(person_row["PER_TYP"]),
@@ -47,6 +49,8 @@ def insert_fars_person(conn: Connection, record: dict) -> bool:
         INSERT INTO fars_persons_clean (
             crash_id,
             crash_year,
+            vehicle_number,
+            person_number,
             person_age,
             sex,
             person_type,
@@ -56,13 +60,15 @@ def insert_fars_person(conn: Connection, record: dict) -> bool:
         VALUES (
             %(crash_id)s,
             %(crash_year)s,
+            %(vehicle_number)s,
+            %(person_number)s,
             %(person_age)s,
             %(sex)s,
             %(person_type)s,
             %(injury_severity)s,
             %(location_code)s
         )
-        ON CONFLICT DO NOTHING
+        ON CONFLICT (crash_id, vehicle_number, person_number) DO NOTHING
         RETURNING 1;
     """
     try:
