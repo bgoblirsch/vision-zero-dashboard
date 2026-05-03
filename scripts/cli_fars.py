@@ -2,8 +2,8 @@ import argparse
 import subprocess
 from pathlib import Path
 
-from etl.fars_pipeline import run_fars_pipeline
-from logger import get_logger
+from pipeline.etl.fars_pipeline import run_fars_pipeline
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 

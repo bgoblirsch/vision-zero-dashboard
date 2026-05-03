@@ -5,10 +5,10 @@ from pathlib import Path
 from psycopg import sql
 from psycopg import Connection
 
-from logger import get_logger
-from db.connection import get_conn
-from etl.transform.parse_fars_crash import parse_fars_date, parse_fars_point
-from etl.transform.parse_fars_crash import map_route_to_road_label
+from pipeline.logger import get_logger
+from pipeline.connection import get_conn
+from pipeline.etl.transform.parse_fars_crash import parse_fars_date, parse_fars_point
+from pipeline.etl.transform.parse_fars_crash import map_route_to_road_label
 
 logger = get_logger(__name__)
 

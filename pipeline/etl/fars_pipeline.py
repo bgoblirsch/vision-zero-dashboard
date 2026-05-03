@@ -1,11 +1,11 @@
 import time
 from pathlib import Path
 
-from etl.extract.fars.extract_fars import download_unzip_fars_year
-from etl.extract.fars.ingest_plan_fars import resolve_target_fars_years
-from etl.load.load_fars_crashes import load_fars_crash_year
-from etl.load.load_fars_persons import load_fars_person_year
-from logger import get_logger
+from pipeline.etl.extract.fars.extract_fars import download_unzip_fars_year
+from pipeline.etl.extract.fars.resolve_fars_years import resolve_target_fars_years
+from pipeline.etl.load.load_fars_crashes import load_fars_crash_year
+from pipeline.etl.load.load_fars_persons import load_fars_person_year
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 import requests
+import time
 import zipfile
 from tqdm import tqdm
 from pathlib import Path
 
-from logger import get_logger
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
+
+MAX_RETRIES = 3
+RETRY_BACKOFF = 5
 
 def extract_if_zip(file_path: Path, extract_to: Path) -> list[Path]:
     '''
@@ -51,6 +55,7 @@ def extract_if_zip(file_path: Path, extract_to: Path) -> list[Path]:
 def download_file(url: str, dest: Path, chunk_size: int = 8192) -> Path:
     """
     Download a file from "url" to "dest" while streaming bytes with a tqdm progress bar.
+    Retries up to MAX_RETRIES times on timeout or connection errors.
 
     :param url: HTTP(S) URL to download.
     :type url: str
@@ -64,19 +69,38 @@ def download_file(url: str, dest: Path, chunk_size: int = 8192) -> Path:
     :raises requests.Timeout: If the request exceeds the timeout.
     """
     dest.parent.mkdir(parents=True, exist_ok=True)
-    try:
-    # Stream download with progress bar
-        with requests.get(url, stream=True, timeout=60) as req:
-            req.raise_for_status()
-            total = int(req.headers.get("content-length", 0))
-            with open(dest, "wb") as file, tqdm(total=total, unit="B", unit_scale=True, desc=dest.name) as progress_bar:
-                for chunk in req.iter_content(chunk_size=chunk_size):
-                    write_chunk(file, chunk, progress_bar)
-    except Exception:
-        if dest.exists():
-            dest.unlink(missing_ok=True)
-        raise
-    return dest
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+        # Stream download with progress bar
+            with requests.get(url, stream=True, timeout=300) as req:
+                req.raise_for_status()
+                total = int(req.headers.get("content-length", 0))
+                with open(dest, "wb") as file, tqdm(total=total, unit="B", unit_scale=True, desc=dest.name) as progress_bar:
+                    for chunk in req.iter_content(chunk_size=chunk_size):
+                        write_chunk(file, chunk, progress_bar)
+            return dest
+        
+        except (requests.Timeout, requests.ConnectionError) as e:
+            if dest.exists():
+                dest.unlink(missing_ok=True)
+            if attempt == MAX_RETRIES:
+                logger.error(
+                    "Download failed after %d attempts: %s", MAX_RETRIES, url
+                )
+                raise
+            wait = RETRY_BACKOFF * (2 ** (attempt - 1))
+            logger.warning(
+                "Download attempt %d/%d failed (%s). Retrying in %ds...",
+                attempt, MAX_RETRIES, e, wait
+            )
+            time.sleep(wait)
+
+        except Exception:
+            if dest.exists():
+                dest.unlink(missing_ok=True)
+            raise
+    raise RuntimeError(f"Exhaused all download retries for {url}")
 
 def write_chunk(file, chunk, progress_bar) -> None:
     '''
