@@ -5,6 +5,7 @@ from pipeline.etl.extract.fars.extract_fars import download_unzip_fars_year
 from pipeline.etl.extract.fars.resolve_fars_years import resolve_target_fars_years
 from pipeline.etl.load.load_fars_crashes import load_fars_crash_year
 from pipeline.etl.load.load_fars_persons import load_fars_person_year
+from pipeline.etl.enrich.enrich_crash_locations import enrich_crash_locations
 from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -74,4 +75,8 @@ def run_fars_pipeline(
                 total_errors,
                 elapsed,
     )
+
+    # Assign city_name to crashes missing city data
+    enrich_crash_locations()
+
     logger.info("[PIPELINE][FARS] Pipeline completed succesfully")

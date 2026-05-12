@@ -36,7 +36,7 @@ def load_crash_id_map(conn: Connection, year: int) -> dict[int, int]:
         cur.execute(
             """
             SELECT st_case, crash_id
-            FROM fars_crashes_clean
+            FROM fars_crashes
             WHERE year = %s
             """,
             (year,),
@@ -46,7 +46,7 @@ def load_crash_id_map(conn: Connection, year: int) -> dict[int, int]:
 
 def insert_fars_person(conn: Connection, record: dict) -> bool:
     query = """
-        INSERT INTO fars_persons_clean (
+        INSERT INTO fars_persons (
             crash_id,
             crash_year,
             vehicle_number,

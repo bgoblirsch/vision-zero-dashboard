@@ -30,7 +30,7 @@ if [[ "$CONFIRM" != "RESET" ]]; then
   exit 1
 fi
 
-psql -U visionzero -d visionzero_db -f schema/drop_clean_tables.sql
+psql -U visionzero -d visionzero_db -f schema/drop_fars_tables.sql
 psql -U visionzero -d visionzero_db -f schema/extensions.sql
-psql -U visionzero -d visionzero_db -f schema/fars_crashes_clean.sql
-psql -U visionzero -d visionzero_db -f schema/fars_persons_clean.sql
+psql -U visionzero -d visionzero_db -f schema/fars_crashes.sql
+psql -U visionzero -d visionzero_db -f schema/fars_persons.sql

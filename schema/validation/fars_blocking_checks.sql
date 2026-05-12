@@ -8,7 +8,7 @@ DO $$
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM fars_crashes_clean
+        FROM fars_crashes
         GROUP BY st_case, year
         HAVING COUNT(*) > 1
     ) THEN
@@ -22,7 +22,7 @@ DO $$
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM fars_crashes_clean
+        FROM fars_crashes
         WHERE year IS NULL
            OR st_case IS NULL
            OR state IS NULL
@@ -38,7 +38,7 @@ DO $$
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM fars_crashes_clean
+        FROM fars_crashes
         WHERE crash_date IS NOT NULL
           AND (
               crash_date < DATE '1987-01-01'
@@ -56,7 +56,7 @@ END $$;
 -- BEGIN
 --     IF EXISTS (
 --         SELECT 1
---         FROM fars_crashes_clean
+--         FROM fars_crashes
 --         WHERE total_fatalities < 0
 --             OR motorist_fatalities < 0
 --             OR cyclist_fatalities < 0
@@ -73,7 +73,7 @@ END $$;
 -- BEGIN
 --     IF EXISTS (
 --         SELECT 1
---         FROM fars_crashes_clean
+--         FROM fars_crashes
 --         WHERE total_fatalities
 --             <> (motorist_fatalities
 --                 + cyclist_fatalities
@@ -89,7 +89,7 @@ DO $$
 BEGIN
     IF EXISTS (
         SELECT 1
-        FROM fars_crashes_clean
+        FROM fars_crashes
         WHERE total_fatalities > 30
     ) THEN
         RAISE EXCEPTION

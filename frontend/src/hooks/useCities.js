@@ -1,0 +1,17 @@
+import { useEffect, useState } from "react"
+import { fetchCities } from "../api/crashes"
+
+export function useCities() {
+    const [cities, setCities] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    useEffect(() => {
+        fetchCities()
+            .then(setCities)
+            .catch(err => setError(err.message))
+            .finally(() => setLoading(false))
+    }, [])
+
+    return { cities, loading, error }
+}

@@ -1,9 +1,9 @@
 -- Creates the PostGIS persons table.
--- File: schema/persons_clean.sql
+-- File: schema/fars_persons.sql
 
-CREATE TABLE IF NOT EXISTS fars_persons_clean (
+CREATE TABLE IF NOT EXISTS fars_persons (
     person_id SERIAL PRIMARY KEY,
-    crash_id INT NOT NULL REFERENCES fars_crashes_clean(crash_id),
+    crash_id INT NOT NULL REFERENCES fars_crashes(crash_id),
     crash_year INT NOT NULL,
     vehicle_number INT NOT NULL,
     person_number INT NOT NULL,

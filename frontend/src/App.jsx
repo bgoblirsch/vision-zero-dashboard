@@ -1,35 +1,37 @@
-import { useEffect, useState } from "react"
-import axios from "axios"
+import { useState } from "react"
+import { useCrashPoints } from "./hooks/useCrashPoints"
+import { useTigerPlaces } from "./hooks/useTigerPlaces"
+import CrashMap from "./components/Map"
 
 function App() {
-  const [cities, setCities] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const { crashPoints, pointsLoading, pointsError } = useCrashPoints()
+  const { tigerPlaces, placesLoading, placesError } = useTigerPlaces()
+  const [selectedPoint, setSelectedPoint] = useState(null)
 
-  useEffect(() => {
-    axios.get("http://localhost:8000/crashes/cities")
-      .then(res => {
-        setCities(res.data)
-        setLoading(false)
-      })
-      .catch(err => {
-        setError(err.message)
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading) return <p>Loading cities...</p>
-  if (error) return <p>Error: {error}</p>
+  if (pointsLoading) return <p>Loading crash points...</p>
+  if (pointsError) return <p>Error: {pointsError}</p>
 
   return (
-    <div>
-      <h1>Vision Zero Dashboard</h1>
-      <p>{cities.length} cities with fatal crash data</p>
-      <ul>
-        {cities.map((city, i) => (
-          <li key={i}>{city.city_name}, {city.state_name}</li>
-        ))}
-      </ul>
+    <div style={{ width: "100vw", height: "100vh" }}>
+      <CrashMap
+        tigerPlaces={tigerPlaces}
+        crashPoints={crashPoints}
+        onPointSelect={setSelectedPoint}
+      />
+      {selectedPoint && (
+        <div style={{
+          position: "absolute",
+          top: 20,
+          left: 20,
+          background: "white",
+          padding: "10px",
+          borderRadius: "4px",
+        }}>
+          <p>{selectedPoint.city_name}, {selectedPoint.state_name}</p>
+          <p>{selectedPoint.crash_date}</p>
+          <p>Fatalities: {selectedPoint.total_fatalities}</p>
+        </div>
+      )}
     </div>
   )
 }

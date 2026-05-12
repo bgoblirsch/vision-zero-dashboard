@@ -12,6 +12,6 @@ SELECT
     p.person_type,
     p.injury_severity
 
-FROM fars_persons_clean p
-JOIN fars_crashes_clean a
+FROM fars_persons p
+JOIN fars_crashes a
   ON p.crash_id = a.crash_id;

@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 MAX_RETRIES = 3
 RETRY_BACKOFF = 5
 
-def extract_if_zip(file_path: Path, extract_to: Path) -> list[Path]:
+def extract_if_zip(file_path: Path, extract_to: Path, expected_extension: str) -> list[Path]:
     '''
     If the file at "path" is a zip, extracts it to "extract_to" path.
     
@@ -37,20 +37,20 @@ def extract_if_zip(file_path: Path, extract_to: Path) -> list[Path]:
         raise
 
     #csv_files = list(path.parent.glob("*.csv"))
-    csv_files = [
+    files = [
         path for path in extract_to.rglob("*")
-        if path.is_file() and path.suffix.casefold() == ".csv"
+        if path.is_file() and path.suffix.casefold() == expected_extension
     ]
 
-    if not csv_files:
+    if not files:
         raise ValueError(f"No CSV files found after extracting {file_path}")
 
-    for csv in csv_files:
-        target = extract_to / csv.name
-        if csv.parent != extract_to:
-            csv.replace(target)
+    for file in files:
+        target = extract_to / file.name
+        if file.parent != extract_to:
+            file.replace(target)
 
-    return list(extract_to.glob("*.csv"))
+    return list(extract_to.glob(f"*{expected_extension}"))
 
 def download_file(url: str, dest: Path, chunk_size: int = 8192) -> Path:
     """
