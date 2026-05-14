@@ -1,17 +1,22 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { fetchCrashPoints } from "../api/crashes"
 
-export function useCrashPoints() {
+export function useCrashPoints(stateFips, placeFips) {
     const [crashPoints, setCrashPoints] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
     useEffect(() => {
-        fetchCrashPoints()
+        if (!stateFips || !placeFips) {
+            setCrashPoints([])
+            return
+        }
+        setLoading(true)
+        fetchCrashPoints(stateFips, placeFips)
             .then(setCrashPoints)
             .catch(err => setError(err.message))
             .finally(() => setLoading(false))
-    }, [])
+    }, [stateFips, placeFips])
 
     return { crashPoints, loading, error }
 }

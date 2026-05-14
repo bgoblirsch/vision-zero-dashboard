@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS fars_crashes (
     county CHAR(3) NOT NULL,
     county_name VARCHAR(40),
     city CHAR(4) NOT NULL,
+    place_fips CHAR (5),
     city_name VARCHAR(80),
     route_code INTEGER,
     road_label VARCHAR(30),

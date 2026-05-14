@@ -14,7 +14,7 @@ const INITIAL_VIEW = {
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/liberty"
 
-export default function CrashMap({ crashPoints, tigerPlaces, onPointSelect  }) {
+export default function CrashMap({ crashPoints, tigerPlaces, cities, onPointSelect, onCitySelect }) {
     const [viewState, setViewState] = useState(INITIAL_VIEW)
 
     const tigerPlacesLayer = new GeoJsonLayer({
@@ -36,6 +36,21 @@ export default function CrashMap({ crashPoints, tigerPlaces, onPointSelect  }) {
         lineWidthUnits: "pixels",
     })
 
+    const cityPointsLayer = new ScatterplotLayer({
+        id: "city-points-layer",
+        data: cities,
+        getPosition: d => [d.lon, d.lat],
+        getRadius: d => Math.sqrt(d.population) * 50,
+        radiusUnits: "meters",
+        radiusMinPixels: 4,
+        radiusMaxPixels: 30,
+        getFillColor: [30, 144, 255, 200],
+        pickable: true,
+        onClick: ({ object }) => {
+            if (object && onCitySelect) onCitySelect(object)
+        },
+    })
+
     const crashPointsLayer = new ScatterplotLayer({
         id: "crash-points-layer",
         data: crashPoints,
@@ -44,10 +59,10 @@ export default function CrashMap({ crashPoints, tigerPlaces, onPointSelect  }) {
         radiusUnits: "meters",
         radiusMinPixels: 2,
         radiusMaxPixels: 10,
-        getFillColor: d => d[2] === 1 ? [255, 200, 0, 180] : [255, 0, 0, 180],
+        getFillColor: d => d[2] === 1 ? [0, 200, 100, 180] : [255, 0, 0, 180],
         pickable: true,
         onClick: ({ object }) => {
-            if (object) onPointSelect({
+            if (point) onPointSelect({
                 lon: object[0],
                 lat: object[1],
                 is_rural: object[2],
@@ -67,7 +82,7 @@ export default function CrashMap({ crashPoints, tigerPlaces, onPointSelect  }) {
             viewState={viewState}
             onViewStateChange={({ viewState }) => setViewState(viewState)}
             controller={true}
-            layers={[tigerPlacesLayer, crashPointsLayer]}
+            layers={[tigerPlacesLayer, cityPointsLayer, crashPointsLayer]}
         >
             <Map mapStyle={MAP_STYLE} />
         </DeckGL>

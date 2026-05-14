@@ -1,22 +1,30 @@
 import { useState } from "react"
 import { useCrashPoints } from "./hooks/useCrashPoints"
-import { useTigerPlaces } from "./hooks/useTigerPlaces"
+import { useCities } from "./hooks/useCities"
 import CrashMap from "./components/Map"
 
 function App() {
-  const { crashPoints, pointsLoading, pointsError } = useCrashPoints()
-  const { tigerPlaces, placesLoading, placesError } = useTigerPlaces()
   const [selectedPoint, setSelectedPoint] = useState(null)
+  const [selectedCity, setSelectedCity] = useState(null)
 
-  if (pointsLoading) return <p>Loading crash points...</p>
+  const { crashPoints, loading: pointsLoading, error: pointsError } = useCrashPoints(
+    selectedCity?.state_fips,
+    selectedCity?.place_fips
+  )
+  const { cities, loading: citiesLoading, error: citiesError } = useCities()
+
+  if (citiesLoading) return <p>Loading...</p>
   if (pointsError) return <p>Error: {pointsError}</p>
+  if (citiesError) return <p>Error: {citiesError}</p>
 
   return (
     <div style={{ width: "100vw", height: "100vh" }}>
       <CrashMap
-        tigerPlaces={tigerPlaces}
+        tigerPlaces={[]}
         crashPoints={crashPoints}
+        cities={cities}
         onPointSelect={setSelectedPoint}
+        onCitySelect={setSelectedCity}
       />
       {selectedPoint && (
         <div style={{

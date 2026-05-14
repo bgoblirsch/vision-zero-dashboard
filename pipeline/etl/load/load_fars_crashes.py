@@ -69,7 +69,11 @@ def assemble_fars_crash(
     fars_city_code = str(crash_row["CITY"]).zfill(4)
     fars_city_name = crash_row.get("CITYNAME")
 
-    if fars_city_code == "0000" or fars_city_name == "Not Applicable":
+    if (
+        fars_city_code == "0000"
+        or fars_city_code >= "9000"
+        or fars_city_name == "Not Applicable"
+    ):
         fars_city_name = "Unincorporated"
 
     if fars_city_name is None:

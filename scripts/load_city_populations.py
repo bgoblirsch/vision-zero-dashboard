@@ -32,10 +32,13 @@ def load_population_data():
         with conn.cursor() as cur:
             for row in rows:
                 record = dict(zip(headers, row))
+                state_code = record["state"]
+                if state_code == "72":
+                    continue
                 split = record["NAME"].split(",")
                 place_name = strip_place_suffix(split[0])
                 state_name = split[-1].strip()
-                state_code = record["state"].lstrip('0')
+                
                 cur.execute("""
                     INSERT INTO city_populations (place_name, state_name, state_fips, place_fips, population)
                     VALUES (%(name)s, %(state_name)s, %(state_code)s, %(place)s, %(pop)s)
