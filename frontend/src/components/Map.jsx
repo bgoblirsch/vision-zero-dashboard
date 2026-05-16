@@ -49,14 +49,14 @@ export default function CrashMap({ crashPoints, cities, onCrashSelect, onCitySel
                  : viewState.zoom < 7 ? 100000
                  : 50000
 
-        const eligibleCities = cities.filter(c => 
-            c.is_vision_zero || c.population >= minPop
+        const eligibleCities = cities.filter(city => 
+            city.is_vision_zero || city.population >= minPop
         )
 
-        const points = eligibleCities.map(c => ({
+        const points = eligibleCities.map(city => ({
             type: "Feature",
-            geometry: { type: "Point", coordinates: [c.lon, c.lat] },
-            properties: { ...c }
+            geometry: { type: "Point", coordinates: [city.lon, city.lat] },
+            properties: { ...city }
         }))
 
         supercluster.load(points)
@@ -129,25 +129,20 @@ export default function CrashMap({ crashPoints, cities, onCrashSelect, onCitySel
         getPosition: d => d.geometry.coordinates,
         getRadius: d => d.properties.cluster ? 12 : 10,
         radiusUnits: "pixels",
-        getFillColor: d => {
-            if (d.properties.cluster) {
-                const leaves = supercluster.getLeaves(d.properties.cluster_id, Infinity)
+        getFillColor: data => {
+            if (data.properties.cluster) {
+                const leaves = supercluster.getLeaves(data.properties.cluster_id, Infinity)
                 const hasVZ = leaves.some(l => l.properties.is_vision_zero)
                 return hasVZ ? [0, 150, 73, 200] : [150, 0, 2, 200]
             }
-            return d.properties.is_vision_zero ? [0, 150, 73, 200] : [150, 0, 2, 200]
+            return data.properties.is_vision_zero ? [0, 150, 73, 200] : [150, 0, 2, 200]
         },
         pickable: true,
         onClick: ({ object }) => {
             if (!object) return
             if (object.properties.cluster) {
-                // zoom into cluster
                 const [longitude, latitude] = object.geometry.coordinates
-                const expansionZoom = Math.min(
-                    supercluster.getClusterExpansionZoom(object.properties.cluster_id),
-                    20
-                )
-                setViewState(v => ({ ...v, longitude, latitude, zoom: expansionZoom }))
+                setViewState(v => ({ ...v, longitude, latitude, zoom: v.zoom + 5 }))
             } else {
                 if (onCitySelect) onCitySelect(object.properties)
             }
@@ -181,6 +176,23 @@ export default function CrashMap({ crashPoints, cities, onCrashSelect, onCitySel
             onViewStateChange={({ viewState }) => setViewState(viewState)}
             controller={true}
             layers={layers}
+            getTooltip={({ object }) => {
+                if (!object) return null
+                if (object.properties?.cluster) return null
+                const props = object.properties || object
+                if (!props.place_name && !props.display_name) return null
+                return {
+                    html: `<div>${props.display_name || props.place_name}</div>`,
+                    style: {
+                        backgroundColor: "white",
+                        padding: "6px 10px",
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        color: "#333",
+                        boxShadow: "0 1px 4px rgba(0,0,0,0.2)"
+                    }
+                }
+            }}
             onClick={({ object }) => {
                 if (!object && selectedCity && onClearCity) onClearCity()
             }}

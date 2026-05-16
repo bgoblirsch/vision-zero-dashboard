@@ -29,7 +29,7 @@ def sanitize_city_name(city_name: str, state_name: str) -> tuple[str, str]:
         logger.error(f"No state code found for state name from vision zero city list: {state_name}")
     return (cleaned_city, state_code)
 
-def load_fars_city_codes():
+def load_vision_zero_cities():
     logger.info("Populating Vision Zero status to census_places table.")
     data_path = Path("data/vision_zero_cities.csv")
     
@@ -68,4 +68,4 @@ def load_fars_city_codes():
     logger.info("Loaded Vision Zero city boolean to census_places table.")
 
 if __name__ == "__main__":
-    load_fars_city_codes()
+    load_vision_zero_cities()

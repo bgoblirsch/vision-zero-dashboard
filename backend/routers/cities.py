@@ -12,6 +12,7 @@ def get_cities(min_population: int = 50000):
     query = """
         SELECT
             places.place_name,
+            places.display_name,
             places.state_fips,
             places.place_fips,
             pop.state_name,
@@ -35,13 +36,14 @@ def get_cities(min_population: int = 50000):
                 return [
                     {
                         "place_name": row[0],
-                        "state_fips": row[1],
-                        "place_fips": row[2],
-                        "state_name": row[3],
-                        "population": row[4],
-                        "is_vision_zero": row[5],
-                        "lon": float(row[6]),
-                        "lat": float(row[7]),
+                        "display_name": row[1],
+                        "state_fips": row[2],
+                        "place_fips": row[3],
+                        "state_name": row[4],
+                        "population": row[5],
+                        "is_vision_zero": row[6],
+                        "lon": float(row[7]),
+                        "lat": float(row[8]),
                     }
                     for row in rows
                 ]

@@ -22,7 +22,7 @@ PLACE_NAME_MAP = {
     ("Saint Petersburg", "Florida"): "St. Petersburg",
     ("St Petersburg", "Florida"): "St. Petersburg",
     ("Port Saint Lucie", "Florida"): "Port St. Lucie",
-    ("Louiville", "Kentucky"): "Louisville/Jefferson County metro government (balance)",
+    ("Louisville", "Kentucky"): "Louisville/Jefferson County metro government (balance)",
     ("Lexington", "Kentucky"): "Lexington-Fayette urban county",
     ("Nashville", "Tennessee"): "Nashville-Davidson metropolitan government (balance)",
     ("Athens", "Georgia"): "Athens-Clarke County unified government (balance)",
