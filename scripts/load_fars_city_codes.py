@@ -3,7 +3,13 @@ import psycopg
 
 from pathlib import Path
 
+from pipeline.logger import get_logger
+
+logger = get_logger(__name__)
+
 def load_fars_city_codes():
+    logger.info("Populating fars_city_codes table.")
+
     data_path = Path("data/fars_city_codes.csv")
     
     with open(data_path, newline='') as file:
@@ -29,6 +35,8 @@ def load_fars_city_codes():
                         "fars_city_name": fars_city_name,
                     })
             conn.commit()
+
+    logger.info("fars_city_codes table populated.")
 
 if __name__ == "__main__":
     load_fars_city_codes()

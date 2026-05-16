@@ -4,6 +4,10 @@ import psycopg
 
 from pathlib import Path
 
+from pipeline.logger import get_logger
+
+logger = get_logger(__name__)
+
 SUFFIX_PATTERN = re.compile(
     r'\s+(city and borough|consolidated government|metropolitan government|unified government|urban county|municipality|borough|village|town|city|CDP)$',
     re.IGNORECASE
@@ -15,6 +19,7 @@ def strip_place_suffix(name: str) -> str:
 
 
 def load_population_data():
+    logger.info("Populating city_population table.")
     data_path = Path("data/acs2023_populations.json")
     
     with open(data_path) as file:
@@ -51,6 +56,8 @@ def load_population_data():
                     "pop": int(record["B01003_001E"]),
                 })
         conn.commit()
+
+    logger.info("city_population table populated.")
 
 if __name__ == "__main__":
     load_population_data()

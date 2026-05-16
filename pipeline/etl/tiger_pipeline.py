@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from pipeline.etl.extract.tiger.extract_tiger_places import download_unzip_tiger_places
-from pipeline.etl.load.load_tiger_places import ingest_tiger_places
+from pipeline.etl.load.load_tiger_places import load_tiger_places
 from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -18,7 +18,7 @@ def run_tiger_pipeline(raw_root: Path) -> None:
     logger.info("[PIPELINE][TIGER] Starting pipeline...")
 
     shapefiles = download_unzip_tiger_places(raw_root)
-    inserted, skipped, errors = ingest_tiger_places(shapefiles)
+    inserted, skipped, errors = load_tiger_places(shapefiles)
 
     elapsed = time.time() - start
     logger.info(

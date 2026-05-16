@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from psycopg.rows import dict_row
 from connection import get_conn
 
 router = APIRouter(prefix="/crashes", tags=["crashes"])

@@ -4,6 +4,7 @@ from pathlib import Path
 import geopandas as gpd
 from psycopg import Connection
 
+from pipeline.etl.transform.mappings import DISPLAY_NAME_MAP, STATE_FIPS_MAP
 from pipeline.connection import get_conn
 from pipeline.logger import get_logger
 
@@ -17,16 +18,22 @@ def insert_tiger_place(conn: Connection, record: dict) -> bool:
         INSERT INTO census_places (
             state_fips,
             place_fips,
+            state_name,
             place_name,
+            display_name,
             place_type,
-            geom
+            geom,
+            point_geom
         )
         VALUES (
             %(state_fips)s,
             %(place_fips)s,
+            %(state_name)s,
             %(place_name)s,
+            %(display_name)s,
             %(place_type)s,
-            ST_SetSRID(ST_GeomFromWKB(%(geom)s), 4326)
+            ST_SetSRID(ST_GeomFromWKB(%(geom)s), 4326),
+            ST_SetSRID(ST_MakePoint(%(intpt_lon)s, %(intpt_lat)s), 4326)
         )
         ON CONFLICT (state_fips, place_fips) DO NOTHING
         RETURNING 1;
@@ -51,11 +58,14 @@ def load_tiger_place_features(conn: Connection, gdf: gpd.GeoDataFrame) -> tuple[
         record = {
             "state_fips": feature.STATEFP,
             "place_fips": feature.PLACEFP,
+            "state_name": STATE_FIPS_MAP.get(str(feature.STATEFP)),
             "place_name": feature.NAME,
+            "display_name": DISPLAY_NAME_MAP.get(str(feature.NAME), feature.NAME),
             "place_type": feature.LSAD,
-            "geom": feature.geometry.wkb,
-            # above is a pylance complaint because itertuples loses type info and 
-            # does not know that feature.geometry is a shapely geometry
+            "geom": feature.geometry.wkb,         # type: ignore
+            "intpt_lon": float(feature.INTPTLON), # type: ignore
+            "intpt_lat": float(feature.INTPTLAT), # type: ignore
+            # above warnings are pylance complaints because itertuples loses type info
         }
 
         try:
@@ -89,7 +99,7 @@ def load_tiger_place_features(conn: Connection, gdf: gpd.GeoDataFrame) -> tuple[
     return insert_count, skip_count, error_count
 
 
-def ingest_tiger_places(shapefiles: list[Path]) -> tuple[int, int, int]:
+def load_tiger_places(shapefiles: list[Path]) -> tuple[int, int, int]:
     start = time.time()
     logger.info("[LOAD][TIGER] Starting place ingestion...")
 
@@ -112,11 +122,6 @@ def ingest_tiger_places(shapefiles: list[Path]) -> tuple[int, int, int]:
             except Exception as e:
                 logger.error(f"[TIGER] Failed to load {shp_path.name}: {e}")
                 raise
-
-        with conn.cursor() as cur:
-            cur.execute("UPDATE census_places SET centroid = ST_Centroid(geom)")
-            conn.commit()
-        logger.info("[LOAD][TIGER] Centroids computed.")
 
     elapsed = time.time() - start
     logger.info(

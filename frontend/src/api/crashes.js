@@ -11,8 +11,6 @@ export async function fetchCityByYear(cityId) {
 export async function fetchCrashPoints(stateFips, placeFips) {
     const res = await fetch(`${BASE_URL}/crashes/points/${stateFips}/${placeFips}`)
     if (!res.ok) throw new Error("Failed to fetch crash points")
-    console.log("Response received, parsing JSON...")
     const data = await res.json()
-    console.log(`Parsed ${data.length} crash points`)
     return data
 }

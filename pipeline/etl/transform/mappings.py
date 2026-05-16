@@ -44,6 +44,18 @@ PLACE_NAME_MAP = {
     ("Winston Salem", "North Carolina"): "Winston-Salem",
 }
 
+DISPLAY_NAME_MAP = {
+    "Athens-Clarke County unified government (balance)": "Athens",
+    "Augusta-Richmond County consolidated government (balance)": "Augusta",
+    "Louisville/Jefferson County metro government (balance)": "Louisville",
+    "Lexington-Fayette urban county": "Lexington",
+    "Nashville-Davidson metropolitan government (balance)": "Nashville",
+    "Macon-Bibb County": "Macon",
+    "Urban Honolulu": "Honolulu",
+    "Indianapolis city (balance)": "Indianapolis",
+    "Boise City": "Boise"
+}
+
 STATE_FIPS_MAP = {
    "01": "Alabama",
    "02": "Alaska",
@@ -55,7 +67,7 @@ STATE_FIPS_MAP = {
    "10": "Delaware",
    "11": "District of Columbia",
    "12": "Florida",
-   "13": "Geogia",
+   "13": "Georgia",
    "15": "Hawaii",
    "16": "Idaho",
    "17": "Illinois",
