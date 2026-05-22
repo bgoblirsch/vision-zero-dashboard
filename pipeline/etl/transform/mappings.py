@@ -15,35 +15,6 @@ ROUTE_MAP = {
     95: "Other"
 }
 
-PLACE_NAME_MAP = {
-    ("Saint Louis", "Missouri"): "St. Louis",
-    ("St Louis", "Missour"): "St. Louis",
-    ("Ft Myers", "Florida"): "Fort Myers",
-    ("Saint Petersburg", "Florida"): "St. Petersburg",
-    ("St Petersburg", "Florida"): "St. Petersburg",
-    ("Port Saint Lucie", "Florida"): "Port St. Lucie",
-    ("Louisville", "Kentucky"): "Louisville/Jefferson County metro government (balance)",
-    ("Lexington", "Kentucky"): "Lexington-Fayette urban county",
-    ("Nashville", "Tennessee"): "Nashville-Davidson metropolitan government (balance)",
-    ("Athens", "Georgia"): "Athens-Clarke County unified government (balance)",
-    ("Augusta", "Georgia"): "Augusta-Richmond County consolidated government (balance)",
-    ("Macon", "Georgia"): "Macon-Bibb County",
-    ("Ventura", "California"): "San Buenaventura (Ventura)",
-    ("Colorado Spgs", "Colorado"): "Colorado Springs",
-    ("Washington, DC", "District of Columbia"): "Washington",
-    ("Honolulu", "Hawaii"): "Urban Honolulu",
-    ("Boise", "Idaho"): "Boise City",
-    ("Indianapolis", "Indiana"): "Indianapolis city (balance)",
-    ("Edison", "New Jersey"): "Other",
-    ("Hamilton Township", "New Jersey"): "Other",
-    ("Middle Village", "New York"): "New York",
-    ("New York -Bronx", "New York"): "New York",
-    ("New York -Queens", "New York"): "New York",
-    ("New York New York", "New York"): "New York",
-    ("New York -Kings", "New York"): "New York",
-    ("Winston Salem", "North Carolina"): "Winston-Salem",
-}
-
 DISPLAY_NAME_MAP = {
     "Athens-Clarke County unified government (balance)": "Athens",
     "Augusta-Richmond County consolidated government (balance)": "Augusta",
@@ -53,7 +24,8 @@ DISPLAY_NAME_MAP = {
     "Macon-Bibb County": "Macon",
     "Urban Honolulu": "Honolulu",
     "Indianapolis city (balance)": "Indianapolis",
-    "Boise City": "Boise"
+    "Boise City": "Boise",
+    "Milford City (balance)": "Milford City",
 }
 
 STATE_FIPS_MAP = {
@@ -108,4 +80,34 @@ STATE_FIPS_MAP = {
    "54": "West Virginia",
    "55": "Wisconsin",
    "56": "Wyoming"
+}
+
+PLACE_NAME_MAP = {
+    ("Saint Louis", "Missouri"): "St. Louis",
+    ("St Louis", "Missour"): "St. Louis",
+    ("Ft Myers", "Florida"): "Fort Myers",
+    ("Saint Petersburg", "Florida"): "St. Petersburg",
+    ("St Petersburg", "Florida"): "St. Petersburg",
+    ("Port Saint Lucie", "Florida"): "Port St. Lucie",
+    ("Louisville", "Kentucky"): "Louisville/Jefferson County metro government (balance)",
+    ("Lexington", "Kentucky"): "Lexington-Fayette urban county",
+    ("Nashville", "Tennessee"): "Nashville-Davidson metropolitan government (balance)",
+    ("Athens", "Georgia"): "Athens-Clarke County unified government (balance)",
+    ("Augusta", "Georgia"): "Augusta-Richmond County consolidated government (balance)",
+    ("Macon", "Georgia"): "Macon-Bibb County",
+    ("Ventura", "California"): "San Buenaventura (Ventura)",
+    ("Colorado Spgs", "Colorado"): "Colorado Springs",
+    ("Washington, DC", "District of Columbia"): "Washington",
+    ("Honolulu", "Hawaii"): "Urban Honolulu",
+    ("Boise", "Idaho"): "Boise City",
+    ("Indianapolis", "Indiana"): "Indianapolis city (balance)",
+    ("Edison", "New Jersey"): "Other",
+    ("Hamilton Township", "New Jersey"): "Other",
+    ("Middle Village", "New York"): "New York",
+    ("New York City", "New York"): "New York",
+    ("New York -Bronx", "New York"): "New York",
+    ("New York -Queens", "New York"): "New York",
+    ("New York New York", "New York"): "New York",
+    ("New York -Kings", "New York"): "New York",
+    ("Winston Salem", "North Carolina"): "Winston-Salem",
 }

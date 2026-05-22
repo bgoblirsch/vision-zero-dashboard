@@ -24,8 +24,7 @@ def insert_tiger_place(conn: Connection, record: dict) -> bool:
             place_name,
             display_name,
             place_type,
-            geom,
-            point_geom
+            geom
         )
         VALUES (
             %(state_fips)s,
@@ -34,8 +33,7 @@ def insert_tiger_place(conn: Connection, record: dict) -> bool:
             %(place_name)s,
             %(display_name)s,
             %(place_type)s,
-            ST_SetSRID(ST_GeomFromWKB(%(geom)s), 4326),
-            ST_SetSRID(ST_MakePoint(%(intpt_lon)s, %(intpt_lat)s), 4326)
+            ST_SetSRID(ST_GeomFromWKB(%(geom)s), 4326)
         )
         ON CONFLICT (state_fips, place_fips) DO NOTHING
         RETURNING 1;
@@ -66,8 +64,6 @@ def load_tiger_place_features(conn: Connection, gdf: gpd.GeoDataFrame) -> tuple[
             "display_name": DISPLAY_NAME_MAP.get(str(feature.NAME), feature.NAME),
             "place_type": feature.LSAD,
             "geom": feature.geometry.wkb,         # type: ignore
-            "intpt_lon": float(feature.INTPTLON), # type: ignore
-            "intpt_lat": float(feature.INTPTLAT), # type: ignore
             # above warnings are pylance complaints because itertuples loses type info
         }
 
@@ -90,7 +86,7 @@ def load_tiger_place_features(conn: Connection, gdf: gpd.GeoDataFrame) -> tuple[
 
             if idx % BATCH_SIZE == 0:
                 conn.commit()
-                logger.info(
+                logger.debug(
                     "(batch committed) +%s processed | +%s inserted | +%s skipped | +%s errors",
                     batch_processed,
                     batch_inserted,
@@ -127,7 +123,6 @@ def load_tiger_places(shapefiles: list[Path]) -> tuple[int, int, int]:
                 raise
 
         fix_consolidated_governments(conn)
-        fix_city_point_locations(conn)
         cleanup_boundary_polygons(conn)
 
     load_vision_zero_cities()
@@ -139,24 +134,6 @@ def load_tiger_places(shapefiles: list[Path]) -> tuple[int, int, int]:
     )
 
     return total_inserted, total_skipped, total_errors
-
-
-def fix_city_point_locations(conn) -> None:
-    logger.info("[TIGER] Applying point geometry overrides...")
-    POINT_GEOM_OVERRIDES = [
-        # (state_fips, place_fips, lon, lat)
-        ("06", "67000", -122.4194, 37.7749)
-    ]
-    with conn.cursor() as cur:
-        for state_fips, place_fips, lon, lat in POINT_GEOM_OVERRIDES:
-            cur.execute("""
-                UPDATE census_places
-                SET point_geom = ST_SetSRID(ST_MakePoint(%(lon)s, %(lat)s), 4326)
-                WHERE state_fips = %(state_fips)s
-                AND place_fips = %(place_fips)s
-            """, {"state_fips": state_fips, "place_fips": place_fips, "lon": lon, "lat": lat})
-        conn.commit()
-    logger.info("[TIGER] Point geometry overrides applied.")
 
 
 def cleanup_boundary_polygons(conn) -> None:

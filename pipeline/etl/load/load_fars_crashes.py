@@ -11,7 +11,6 @@ from pipeline.etl.transform.mappings import STATE_FIPS_MAP
 from pipeline.etl.transform.parse_fars_crash import (
     parse_fars_date, 
     parse_fars_geom, 
-    parse_fars_city, 
     map_route_to_road_label
 )
 
@@ -79,7 +78,9 @@ def assemble_fars_crash(
     if fars_city_name is None:
         fars_city_name = glc_lookup.get((state_code, fars_city_code))
 
-    city_name = parse_fars_city(fars_city_name, state_name)
+    #city_name = parse_fars_city(fars_city_name, state_name)
+    if fars_city_name is None:
+        fars_city_name = "ERROR"
 
     return {
         "st_case": crash_row["ST_CASE"],
@@ -89,8 +90,8 @@ def assemble_fars_crash(
         "state_name": state_name,
         "county": county_code,
         "county_name": crash_row.get("COUNTYNAME"),
-        "city": int(fars_city_code),
-        "city_name": city_name,
+        "city": fars_city_code,
+        "fars_city_name": fars_city_name,
         "route_code": route_code,
         "road_label": road_label,
         "total_fatalities": int(crash_row.get("FATALS", 0)),
@@ -116,7 +117,7 @@ def insert_fars_crash(conn: Connection, record: dict) -> bool:
             county,
             county_name,
             city,
-            city_name,
+            fars_city_name,
             route_code,
             road_label, 
             total_fatalities, 
@@ -131,7 +132,7 @@ def insert_fars_crash(conn: Connection, record: dict) -> bool:
             %(county)s,
             %(county_name)s,
             %(city)s,
-            %(city_name)s,
+            %(fars_city_name)s,
             %(route_code)s,
             %(road_label)s,
             %(total_fatalities)s,
@@ -227,7 +228,7 @@ def load_fars_crash_rows(
                 batch_skipped += 1
             if idx % BATCH_SIZE == 0:
                 conn.commit()
-                logger.info(
+                logger.debug(
                     "(batch committed) +%s processed | +%s inserted | +%s skipped | +%s errors",
                     batch_processed,
                     batch_inserted,
@@ -263,7 +264,7 @@ def load_fars_crash_year(file_path: Path, year: int) -> tuple[int, int, int]:
     else:
         elapsed = time.time() - start
         logger.info(
-            f"[FARS] Completed loading {year}. "
+            f"[FARS] Completed loading {year} crashes. "
             f"Inserted={insert_count}, skipped={skip_count}, errors={error_count}, "
             f"duration={elapsed:.2f}s"
         )

@@ -58,20 +58,20 @@ ORDER BY year;
 \echo 'blocking check'
 \echo 
 
--- SELECT  !!! TODO !!! fatality logic not implemented yet.
---     st_case, 
---     year, 
---     total_fatalities, 
---     motorist_fatalities, 
---     cyclist_fatalities, 
---     pedestrian_fatalities
--- FROM fars_crashes
--- WHERE
---   total_fatalities < 0 OR
---   motorist_fatalities < 0 OR
---   cyclist_fatalities < 0 OR
---   pedestrian_fatalities < 0
--- LIMIT 10;
+SELECT
+    st_case, 
+    year, 
+    total_fatalities, 
+    motorist_fatalities, 
+    cyclist_fatalities, 
+    pedestrian_fatalities
+FROM fars_crashes
+WHERE
+  total_fatalities < 0 OR
+  motorist_fatalities < 0 OR
+  cyclist_fatalities < 0 OR
+  pedestrian_fatalities < 0
+LIMIT 10;
 
 \echo '------------------'
 \echo 'Fatality Sum Check'
@@ -85,17 +85,17 @@ ORDER BY year;
 \echo 'blocking check'
 \echo 
 
--- SELECT  !!! TODO !!! fatality logic not implemented yet.
---     st_case, 
---     year, 
---     total_fatalities, 
---     motorist_fatalities, 
---     cyclist_fatalities, 
---     pedestrian_fatalities
--- FROM fars_crashes
--- WHERE
---   total_fatalities > 30
--- LIMIT 10;
+SELECT
+    st_case, 
+    year, 
+    total_fatalities, 
+    motorist_fatalities, 
+    cyclist_fatalities, 
+    pedestrian_fatalities
+FROM fars_crashes
+WHERE
+  total_fatalities > 30
+LIMIT 10;
 
 -- !!! To-Do !!!
 
@@ -131,24 +131,15 @@ FROM fars_crashes;
 \echo '----------------------------'
 \echo 
 
--- SELECT !!! TODO !!! fatality logic not implemented yet.
---     year,
---     SUM(total_fatalities) AS total,
---     SUM(pedestrian_fatalities) AS peds,
---     SUM(cyclist_fatalities) AS cyclists,
---     SUM(motorist_fatalities) AS motorists
--- FROM fars_crashes
--- GROUP BY year
--- ORDER BY year;
-
-\echo '-----------------------------'
-\echo 'Invalid State Codes; expect 0'
-\echo '-----------------------------'
-\echo
-
-SELECT DISTINCT state
+SELECT
+    year,
+    SUM(total_fatalities) AS total,
+    SUM(pedestrian_fatalities) AS peds,
+    SUM(cyclist_fatalities) AS cyclists,
+    SUM(motorist_fatalities) AS motorists
 FROM fars_crashes
-WHERE state NOT BETWEEN 1 AND 56;
+GROUP BY year
+ORDER BY year;
 
 \echo '-----------------------------------------'
 \echo 'Ensure year and file_year match; expect 0'

@@ -1,11 +1,18 @@
 import { useState } from "react"
+
 import { useCrashPoints } from "./hooks/useCrashPoints"
 import { useCities } from "./hooks/useCities"
 import CrashMap from "./components/Map"
+import DataPane from "./components/DataPane"
+import "./styles/App.css"
+
 
 function App() {
   const [selectedCrash, setSelectedCrash] = useState(null)
   const [selectedCity, setSelectedCity] = useState(null)
+  const [dataPaneView, setDataPaneView] = useState("table") // table | city
+  const [fatalityFilter, setFatalityFilter] = useState("all") // all | motorist | pedestrian | cyclist | other
+  const [vzFilter, setVzFilter] = useState(new Set(["vz", "non-vz"]))
 
   const { cities, loading: citiesLoading, error: citiesError } = useCities()
   const { crashPoints, loading: pointsLoading, error: pointsError } = useCrashPoints(
@@ -16,11 +23,25 @@ function App() {
   const handleCitySelect = (city) => {
     setSelectedCity(city)
     setSelectedCrash(null)
+    setDataPaneView("city")
   }
 
   const handleClearCity = () => {
     setSelectedCity(null)
     setSelectedCrash(null)
+    setDataPaneView("table")
+  }
+
+  const handleVzFilterChange = (value) => {
+    setVzFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(value)) {
+        if (next.size > 1) next.delete(value) // prevent deselecting both
+      } else {
+        next.add(value)
+      }
+      return next
+    })
   }
   
   if (citiesLoading) return <p>Loading...</p>
@@ -28,29 +49,37 @@ function App() {
   if (citiesError) return <p>Error: {citiesError}</p>
 
   return (
-    <div style={{ width: "100vw", height: "100vh" }}>
-      <CrashMap
-        crashPoints={crashPoints}
-        onCrashSelect={setSelectedCrash}
-        cities={cities}
-        selectedCity={selectedCity}
-        onCitySelect={handleCitySelect}
-        onClearCity={handleClearCity}
-      />
-      {selectedCrash && (
-        <div style={{
-          position: "absolute",
-          top: 20,
-          left: 20,
-          background: "white",
-          padding: "10px",
-          borderRadius: "4px",
-        }}>
-          <p>{selectedCrash.city_name}, {selectedCrash.state_name}</p>
-          <p>{selectedCrash.crash_date}</p>
-          <p>Fatalities: {selectedCrash.total_fatalities}</p>
-        </div>
-      )}
+    <div style={{ display: "flex", width: "100vw", height: "100vh", overflow: "hidden" }}>
+      <div style={{ flex: "0 0 60%" }}>
+        <CrashMap
+          crashPoints={crashPoints}
+          onCrashSelect={setSelectedCrash}
+          selectedCrash={selectedCrash}
+          cities={cities}
+          selectedCity={selectedCity}
+          onCitySelect={handleCitySelect}
+          onClearCity={handleClearCity}
+          fatalityFilter={fatalityFilter}
+          vzFilter={vzFilter}
+          onVzFilterChange={handleVzFilterChange}
+          onFatalityFilterChange={setFatalityFilter}
+          onCrashDeselect={() => setSelectedCrash(null)}
+        />
+      </div>
+      <div style={{ flex: "0 0 40%", overflowY: "auto", borderLeft: "1px solid #e0e0e0" }}>
+        <DataPane
+          cities={cities}
+          selectedCity={selectedCity}
+          selectedCrash={selectedCrash}
+          view={dataPaneView}
+          vzFilter={vzFilter}
+          fatalityFilter={fatalityFilter}
+          onVzFilterChange={handleVzFilterChange}
+          onFatalityFilterChange={setFatalityFilter}
+          onCitySelect={handleCitySelect}
+          onClearCity={handleClearCity}
+        />
+      </div>
     </div>
   )
 }

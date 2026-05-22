@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS city_stats (
+    id SERIAL PRIMARY KEY,
+    place_name VARCHAR(100),
+    state_name VARCHAR(50),
+    state_fips CHAR(2),
+    place_fips CHAR(5),
+    population INTEGER,
+    avg_fatalities_5yr NUMERIC(8,2),
+    avg_5yr_pedestrian NUMERIC(8,2),
+    avg_5yr_cyclist NUMERIC(8,2),
+    avg_5yr_motorist NUMERIC(8,2),
+    avg_per_100k_5yr NUMERIC(8,2),
+    avg_per_100k_pedestrian NUMERIC(8,2),
+    avg_per_100k_cyclist NUMERIC(8,2),
+    avg_per_100k_motorist NUMERIC(8,2),
+    trend_pct_change NUMERIC(10,4),
+    trend_pct_change_pedestrian NUMERIC(10,4),
+    trend_pct_change_cyclist NUMERIC(10,4),
+    trend_pct_change_motorist NUMERIC(10,4),
+    CONSTRAINT city_stats_state_fips_place_fips_unique UNIQUE (state_fips, place_fips)
+);

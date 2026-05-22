@@ -13,10 +13,15 @@ CREATE TABLE IF NOT EXISTS fars_crashes (
     county_name VARCHAR(40),
     city CHAR(4) NOT NULL,
     place_fips CHAR (5),
-    city_name VARCHAR(80),
+    fars_city_name VARCHAR(80),
+    fips_city_name VARCHAR(80),
     route_code INTEGER,
     road_label VARCHAR(30),
     total_fatalities INTEGER NOT NULL CHECK (total_fatalities >= 0),
+    motorist_fatalities INTEGER,
+    pedestrian_fatalities INTEGER,
+    cyclist_fatalities INTEGER,
+    other_fatalities INTEGER,
     location GEOMETRY(Point, 4326), -- WGS84
     CONSTRAINT crashes_stcase_year_unique UNIQUE (st_case, year)
 );
@@ -29,7 +34,7 @@ CREATE INDEX IF NOT EXISTS crashes_location_gist_idx ON fars_crashes USING GIST 
 CREATE INDEX IF NOT EXISTS crashes_date_idx ON fars_crashes (crash_date);
 CREATE INDEX IF NOT EXISTS crashes_state_idx ON fars_crashes (state_name);
 CREATE INDEX IF NOT EXISTS crashes_county_idx ON fars_crashes (county_name);
-CREATE INDEX IF NOT EXISTS crashes_city_idx ON fars_crashes (city_name);
+CREATE INDEX IF NOT EXISTS crashes_city_idx ON fars_crashes (fars_city_name);
 
 COMMENT ON TABLE fars_crashes IS
 'FARS crash-level fatalities, normalized across historical schema changes';

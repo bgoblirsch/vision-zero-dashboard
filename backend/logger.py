@@ -1,12 +1,8 @@
 import logging
-import sys
 import os
+import sys
 
 def get_logger(name: str):
-    """
-    Returns a configured logger instance.
-    - name: typically __name__ of the calling module
-    """
     logger = logging.getLogger(name)
     
     if not logger.hasHandlers():

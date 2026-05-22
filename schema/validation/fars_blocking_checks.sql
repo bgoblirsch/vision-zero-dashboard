@@ -42,47 +42,48 @@ BEGIN
         WHERE crash_date IS NOT NULL
           AND (
               crash_date < DATE '1987-01-01'
-              OR crash_date > DATE '2023-12-31'
+              OR crash_date > DATE '2024-12-31'
           )
         LIMIT 1
     ) THEN
         RAISE EXCEPTION
-            'Blocking check failed: crash_date outside expected range (1987–2023)';
+            'Blocking check failed: crash_date outside expected range (1987–2024)';
     END IF;
 END $$;
 
--- negative fatality values !!! TODO !!! - fatality logic not yet implemented
--- DO $$ 
--- BEGIN
---     IF EXISTS (
---         SELECT 1
---         FROM fars_crashes
---         WHERE total_fatalities < 0
---             OR motorist_fatalities < 0
---             OR cyclist_fatalities < 0
---             OR pedestrian_fatalities < 0
---         LIMIT 1
---     ) THEN
---         RAISE EXCEPTION
---             'Blocking check failed: negative fatality value encountered.';
---     END IF;
--- END $$;
+-- negative fatality values
+DO $$ 
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM fars_crashes
+        WHERE total_fatalities < 0
+            OR motorist_fatalities < 0
+            OR cyclist_fatalities < 0
+            OR pedestrian_fatalities < 0
+        LIMIT 1
+    ) THEN
+        RAISE EXCEPTION
+            'Blocking check failed: negative fatality value encountered.';
+    END IF;
+END $$;
 
--- fatality sum check !!! TODO !!! - fatality count logic not implemented yet
--- DO $$
--- BEGIN
---     IF EXISTS (
---         SELECT 1
---         FROM fars_crashes
---         WHERE total_fatalities
---             <> (motorist_fatalities
---                 + cyclist_fatalities
---                 + pedestrian_fatalities)
---     ) THEN
---         RAISE EXCEPTION
---             'Blocking check failed: total_fatalities does not equal sum of fatality subtypes';
---     END IF;
--- END $$;
+-- fatality sum check
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1
+        FROM fars_crashes
+        WHERE total_fatalities
+            <> (motorist_fatalities
+                + cyclist_fatalities
+                + pedestrian_fatalities
+                + other_fatalities)
+    ) THEN
+        RAISE EXCEPTION
+            'Blocking check failed: total_fatalities does not equal sum of fatality subtypes';
+    END IF;
+END $$;
 
 -- max fatality check
 DO $$

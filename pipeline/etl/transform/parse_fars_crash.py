@@ -1,6 +1,5 @@
-import string
 from datetime import date
-from pipeline.etl.transform.mappings import ROUTE_MAP, PLACE_NAME_MAP
+from pipeline.etl.transform.mappings import ROUTE_MAP
 
 
 def map_route_to_road_label(raw_value: str | int | None) -> str:
@@ -17,11 +16,12 @@ def map_route_to_road_label(raw_value: str | int | None) -> str:
     return ROUTE_MAP.get(route_int, "Unknown")
 
 
-def parse_fars_city(city_name: str | None, state: str ) -> str:
-    if city_name is None:
-        return "ERROR"
-    city_name = string.capwords(city_name.lower())
-    return PLACE_NAME_MAP.get((city_name, state), city_name)
+# OLD - slated for removal
+# def parse_fars_city(city_name: str | None, state: str ) -> str:
+#     if city_name is None:
+#         return "ERROR"
+#     city_name = string.capwords(city_name.lower())
+#     return PLACE_NAME_MAP.get((city_name, state), city_name)
     
 
 def parse_fars_geom(row: dict) -> tuple[float, float] | tuple[None, None]:
@@ -29,8 +29,8 @@ def parse_fars_geom(row: dict) -> tuple[float, float] | tuple[None, None]:
     Extract longitude/latitude from FARS row.
     Returns (lon, lat) as floats or (None, None) if missing/invalid.
     """
-    raw_lon = row.get("LONGITUD")
-    raw_lat = row.get("LATITUDE")
+    raw_lon = row.get("LONGITUD") or row.get("longitud")
+    raw_lat = row.get("LATITUDE") or row.get("latitude")
 
     # -- Missing or blank --
     if not raw_lon or not raw_lat:

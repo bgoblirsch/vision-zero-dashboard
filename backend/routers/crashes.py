@@ -1,38 +1,46 @@
 from fastapi import APIRouter, HTTPException
+
 from connection import get_conn
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/crashes", tags=["crashes"])
     
 
-@router.get("/city/{city_id}/by-year")
-def get_city_fatalities_by_year(city_id: int):
-    """Return total fatal crashes by year for a given city."""
+@router.get("/{state_fips}/{place_fips}/by-year")
+def get_city_crashes_by_year(state_fips: str, place_fips: str):
+    """Return annual crash fatality totals by subtype for a given city."""
     query = """
         SELECT
             year,
-            SUM(total_fatalities) as total_fatalities
+            SUM(total_fatalities)        AS total_fatalities,
+            SUM(motorist_fatalities)     AS motorist_fatalities,
+            SUM(pedestrian_fatalities)   AS pedestrian_fatalities,
+            SUM(cyclist_fatalities)      AS cyclist_fatalities,
+            SUM(other_fatalities)        AS other_fatalities
         FROM fars_crashes
-        WHERE city = %(city_id)s
+        WHERE state = %(state_fips)s
+          AND place_fips = %(place_fips)s
         GROUP BY year
         ORDER BY year
     """
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
-                cur.execute(query, {"city_id": city_id})
-                rows = cur.fetchall()
-                return [
-                    {
-                        "year": row[0],
-                        "total_fatalities": row[1],
-                    }
-                    for row in rows
-                ]
+                cur.execute(query, {"state_fips": state_fips, "place_fips": place_fips})
+                assert cur.description is not None
+                columns = [desc[0] for desc in cur.description]
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
     except Exception as e:
+        logger.error(
+            "get_city_crashes_by_year failed for state=%s place=%s: %s",
+            state_fips, place_fips, e
+        )
         raise HTTPException(status_code=500, detail=str(e))
     
 
-@router.get("/points/{state_fips}/{place_fips}")
+@router.get("/{state_fips}/{place_fips}")
 def get_crash_points(state_fips: str, place_fips: str):
     """Return crash points for a specified city by FIPS code."""
     query = """
@@ -43,9 +51,14 @@ def get_crash_points(state_fips: str, place_fips: str):
             year,
             crash_date,
             state_name,
-            city_name,
+            fars_city_name,
+            fips_city_name,
             road_label,
-            total_fatalities
+            total_fatalities,
+            motorist_fatalities,
+            pedestrian_fatalities,
+            cyclist_fatalities,
+            other_fatalities
         FROM fars_crashes
         WHERE year >= 2001
           AND location IS NOT NULL
@@ -57,7 +70,9 @@ def get_crash_points(state_fips: str, place_fips: str):
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, {"state_fips": state_fips, "place_fips": place_fips})
-                return cur.fetchall()
+                assert cur.description is not None
+                columns = [desc[0] for desc in cur.description]
+                return [dict(zip(columns, row)) for row in cur.fetchall()]
     except Exception as e:
-        print(e)
+        logger.error("get_crash_points() failed for state=%s city=%s: %s", state_fips, place_fips, e)
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,9 +1,9 @@
 import json
 import re
-import psycopg
 
 from pathlib import Path
 
+from pipeline.connection import get_conn
 from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -19,7 +19,7 @@ def strip_place_suffix(name: str) -> str:
 
 
 def load_population_data():
-    logger.info("Populating city_population table.")
+    logger.info("[LOAD] Loading city_stats table with ACS population data.")
     data_path = Path("data/acs2023_populations.json")
     
     with open(data_path) as file:
@@ -28,12 +28,8 @@ def load_population_data():
     # First row is headers: ["NAME", "B01003_001E", "state", "place"]
     headers = data[0]
     rows = data[1:]
-    
-    with psycopg.connect(
-        host="localhost",
-        dbname="visionzero_db",
-        user="visionzero",
-    ) as conn:
+
+    with get_conn() as conn:
         with conn.cursor() as cur:
             for row in rows:
                 record = dict(zip(headers, row))
@@ -45,7 +41,7 @@ def load_population_data():
                 state_name = split[-1].strip()
                 
                 cur.execute("""
-                    INSERT INTO city_populations (place_name, state_name, state_fips, place_fips, population)
+                    INSERT INTO city_stats (place_name, state_name, state_fips, place_fips, population)
                     VALUES (%(name)s, %(state_name)s, %(state_code)s, %(place)s, %(pop)s)
                     ON CONFLICT DO NOTHING
                 """, {
@@ -57,7 +53,7 @@ def load_population_data():
                 })
         conn.commit()
 
-    logger.info("city_population table populated.")
+    logger.info("[LOAD] Finished loading city_stats table with ACS population data.")
 
 if __name__ == "__main__":
     load_population_data()

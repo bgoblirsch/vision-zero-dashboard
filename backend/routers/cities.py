@@ -1,54 +1,60 @@
 import json
 from fastapi import APIRouter, HTTPException
 from psycopg.rows import dict_row
+
 from connection import get_conn
+from backend.logger import get_logger
+
+logger = get_logger(__name__)
 
 router = APIRouter(prefix="/cities", tags=["cities"])
 
 
 @router.get("")
 def get_cities(min_population: int = 50000):
-    """Return city markers with population for national map view."""
+    """Return cities, their locations, and their stats."""
     query = """
         SELECT
             places.place_name,
             places.display_name,
             places.state_fips,
             places.place_fips,
-            pop.state_name,
-            pop.population,
+            stats.state_name,
+            stats.population,
             places.is_vision_zero,
             ST_X(places.point_geom) AS lon,
-            ST_Y(places.point_geom) AS lat
+            ST_Y(places.point_geom) AS lat,
+            stats.avg_fatalities_5yr,
+            stats.avg_5yr_pedestrian,
+            stats.avg_5yr_cyclist,
+            stats.avg_5yr_motorist,
+            stats.avg_per_100k_5yr,
+            stats.avg_per_100k_pedestrian,
+            stats.avg_per_100k_cyclist,
+            stats.avg_per_100k_motorist,
+            stats.avg_per_100k_5yr,
+            stats.trend_pct_change,
+            stats.trend_pct_change_pedestrian,
+            stats.trend_pct_change_cyclist,
+            stats.trend_pct_change_motorist
         FROM census_places places
-        JOIN city_populations pop
-            ON places.state_fips = pop.state_fips
-            AND places.place_fips = pop.place_fips
-        WHERE pop.population >= %(min_population)s
+        JOIN city_stats stats
+            ON places.state_fips = stats.state_fips
+            AND places.place_fips = stats.place_fips
+        WHERE stats.population >= %(min_population)s
             OR places.is_vision_zero = TRUE
-        ORDER BY pop.population DESC
+        ORDER BY stats.population DESC
     """
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
                 cur.execute(query, {"min_population": min_population})
+                assert cur.description is not None
+                columns = [desc[0] for desc in cur.description]
                 rows = cur.fetchall()
-                return [
-                    {
-                        "place_name": row[0],
-                        "display_name": row[1],
-                        "state_fips": row[2],
-                        "place_fips": row[3],
-                        "state_name": row[4],
-                        "population": row[5],
-                        "is_vision_zero": row[6],
-                        "lon": float(row[7]),
-                        "lat": float(row[8]),
-                    }
-                    for row in rows
-                ]
+                return [dict(zip(columns, row)) for row in rows]
     except Exception as e:
-        print(e)
+        logger.error("get_cities failed: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
     
 
@@ -75,7 +81,7 @@ def get_city_extent(state_fips: str, place_fips: str):
                     raise HTTPException(status_code=404, detail="Place not found")
                 return row
     except Exception as e:
-        print(e)
+        logger.error("get_city_extent failed | state_id: %s | city_id: %s | %s", state_fips, place_fips, e)
         raise HTTPException(status_code=500, detail=str(e))
     
 
@@ -106,5 +112,5 @@ def get_city_boundary(state_fips: str, place_fips: str):
                     "geom": json.loads(row["geom"]),
                 }
     except Exception as e:
-        print(e)
+        logger.error("get_city_boundary failed | state_id: %s | city_id: %s | %s", state_fips, place_fips, e)
         raise HTTPException(status_code=500, detail=str(e))
