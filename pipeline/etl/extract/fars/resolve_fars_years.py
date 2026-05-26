@@ -4,7 +4,7 @@ logger = get_logger(__name__)
 
 FIRST_FARS_YEAR = 1975
 DEFAULT_START_YEAR = 1987
-DEFAULT_END_YEAR = 2023 # !!! Temp hardcode !!!
+DEFAULT_END_YEAR = 2024 # !!! Temp hardcode !!!
 
 def resolve_target_fars_years(
         requested_years: list[int] | None,

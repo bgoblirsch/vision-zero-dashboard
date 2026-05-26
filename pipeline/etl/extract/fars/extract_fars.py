@@ -45,7 +45,7 @@ def download_unzip_fars_year(
         logger.info(f"[FARS] {year} already extracted with ({len(existing_csvs)} CSVs), skipping unzip.")
     else:
         logger.info(f"[FARS] Extracting {year}...")
-        extract_if_zip(file_path=zip_path, extract_to=year_dir)
+        extract_if_zip(file_path=zip_path, extract_to=year_dir, expected_extension=".csv")
     
     # -- Rescan for CSVs and return --
     csvs = [

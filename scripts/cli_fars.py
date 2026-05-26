@@ -1,8 +1,10 @@
 import argparse
 import subprocess
+import time
 from pathlib import Path
 
 from pipeline.etl.fars_pipeline import run_fars_pipeline
+from pipeline.etl.enrich.enrich_crash_locations import enrich_crash_locations
 from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -15,6 +17,7 @@ def run_fars_validation() -> None:
     )
 
 def main() -> None:
+    start = time.time()
     parser = argparse.ArgumentParser(description="Run FARS pipeline")
     parser.add_argument(
         "--raw-root",
@@ -35,17 +38,30 @@ def main() -> None:
         help="Only run validation checks; no extraction or loading."
     )
 
+    parser.add_argument(
+        "--enrich-only",
+        action="store_true",
+        help="Only run spatial enrichment; no extraction or loading."
+    )
+
     args = parser.parse_args()
 
     if args.validate_only:
         run_fars_validation()
         logger.info("[PIPELINE][FARS] Validation Completed. Passed all blocking checks.")
         return
+    
+    if args.enrich_only:
+        enrich_crash_locations()
+        return
 
     run_fars_pipeline(
         raw_root=args.raw_root,
         requested_years=args.years,
     )
+
+    elapsed = time.time() - start
+    logger.info("[PIPELINE][FARS] Finished running FARS pipeline. Duration: %.2fs", elapsed)
 
 if __name__ == "__main__":
     main()

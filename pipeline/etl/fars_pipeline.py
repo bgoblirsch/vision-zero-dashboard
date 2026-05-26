@@ -3,8 +3,16 @@ from pathlib import Path
 
 from pipeline.etl.extract.fars.extract_fars import download_unzip_fars_year
 from pipeline.etl.extract.fars.resolve_fars_years import resolve_target_fars_years
+
 from pipeline.etl.load.load_fars_crashes import load_fars_crash_year
 from pipeline.etl.load.load_fars_persons import load_fars_person_year
+
+from pipeline.etl.transform.derive_fars_person_subtypes import run_derive_fars_subtypes
+from pipeline.etl.transform.derive_city_stats import run_derive_city_stats
+from pipeline.etl.transform.derive_city_rankings import run_derive_city_rankings
+
+from pipeline.etl.enrich.enrich_crash_locations import enrich_crash_locations
+
 from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
@@ -74,4 +82,17 @@ def run_fars_pipeline(
                 total_errors,
                 elapsed,
     )
-    logger.info("[PIPELINE][FARS] Pipeline completed succesfully")
+
+    # Assign city_name to crashes missing city data
+    enrich_crash_locations()
+
+    # Derive person mode/type for all crashes in the specified year(s)
+    run_derive_fars_subtypes(years=years)
+
+    # Derive 5 year avg data for cities
+    run_derive_city_stats()
+
+    # rank cities
+    run_derive_city_rankings()
+
+    logger.info("[PIPELINE][FARS] Pipeline completed successfully")

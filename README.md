@@ -166,9 +166,38 @@ The pipeline is structured around a **decoupled Extract → Transform/Load (E→
 
 Example (run locally with a configured PostgreSQL database):
 
+Run city pipeline (load city boundaries and populatin data).
+Must be run before the fars pipeline. Only needs to run every few years when updating population .data.
+```bash
+python -m pipeline.etl.city_pipeline
+```
+
+Run the full fars pipeline:
+```bash
+python scripts/cli_fars.py 
+```
+
+Run specific years:
 ```bash
 python src/etl/run_fars_pipeline.py --years 1995 1996 1997
 ```
+
+Run enrichment only 
+(assign city data to points that are missing city data but fall within a census place boundary):
+```bash
+python src/etl/run_fars_pipeline.py --enrich-only
+```
+
+Validate only:
+```bash
+python src/etl/run_fars_pipeline.py --validate-only
+```
+
+Reset the FARS portion of the database for a fresh pipeline run:
+```bash
+ENV=local bash scripts/reset_db.sh 
+```
+
 
 ## Notes
 

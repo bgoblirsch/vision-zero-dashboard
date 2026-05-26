@@ -17,6 +17,7 @@ def assemble_fars_person(
 ) -> dict:
     return {
         "crash_id": crash_id,
+        "st_case": person_row["ST_CASE"],
         "crash_year": file_year,
         "vehicle_number": int(person_row["VEH_NO"]),
         "person_number": int(person_row["PER_NO"]),
@@ -36,7 +37,7 @@ def load_crash_id_map(conn: Connection, year: int) -> dict[int, int]:
         cur.execute(
             """
             SELECT st_case, crash_id
-            FROM fars_crashes_clean
+            FROM fars_crashes
             WHERE year = %s
             """,
             (year,),
@@ -46,8 +47,9 @@ def load_crash_id_map(conn: Connection, year: int) -> dict[int, int]:
 
 def insert_fars_person(conn: Connection, record: dict) -> bool:
     query = """
-        INSERT INTO fars_persons_clean (
+        INSERT INTO fars_persons (
             crash_id,
+            st_case,
             crash_year,
             vehicle_number,
             person_number,
@@ -59,6 +61,7 @@ def insert_fars_person(conn: Connection, record: dict) -> bool:
         )
         VALUES (
             %(crash_id)s,
+            %(st_case)s,
             %(crash_year)s,
             %(vehicle_number)s,
             %(person_number)s,
@@ -136,7 +139,7 @@ def load_fars_persons_rows(
                 batch_skipped += 1
             if idx % BATCH_SIZE == 0:
                 conn.commit()
-                logger.info(
+                logger.debug(
                     "(batch committed) +%s processed | +%s inserted | +%s skipped | +%s errors",
                     batch_processed,
                     batch_inserted,
@@ -174,7 +177,7 @@ def load_fars_person_year(file_path: Path, year: int) -> tuple[int, int, int]:
     else:
         elapsed = time.time() - start
         logger.info(
-            f"[FARS] Completed loading {year}. "
+            f"[FARS] Completed loading {year} persons. "
             f"Inserted={insert_count}, skipped={skip_count}, errors={error_count}, "
             f"duration={elapsed:.2f}s"
         )

@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 
 def get_logger(name: str):
     """
@@ -8,8 +9,9 @@ def get_logger(name: str):
     """
     logger = logging.getLogger(name)
     
-    if not logger.hasHandlers():  
-        logger.setLevel(logging.INFO)
+    if not logger.hasHandlers():
+        level = logging.DEBUG if os.getenv("FARS_DEBUG") else logging.INFO
+        logger.setLevel(level)
 
         handler = logging.StreamHandler(sys.stdout)
         formatter = logging.Formatter(

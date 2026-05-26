@@ -7,8 +7,12 @@ from psycopg import Connection
 
 from pipeline.logger import get_logger
 from pipeline.connection import get_conn
-from pipeline.etl.transform.parse_fars_crash import parse_fars_date, parse_fars_point
-from pipeline.etl.transform.parse_fars_crash import map_route_to_road_label
+from pipeline.etl.transform.mappings import STATE_FIPS_MAP
+from pipeline.etl.transform.parse_fars_crash import (
+    parse_fars_date, 
+    parse_fars_geom, 
+    map_route_to_road_label
+)
 
 logger = get_logger(__name__)
 
@@ -43,24 +47,51 @@ def open_csv_with_fallback(path: Path):
         return open(path, newline="", encoding="latin-1")
 
 def assemble_fars_crash(
+        glc_lookup: dict,
         crash_row: dict,
         file_year: int,
 ) -> dict:
-    lon, lat = parse_fars_point(crash_row)
+    lon, lat = parse_fars_geom(crash_row)
     route_code = int(crash_row.get("ROUTE", 9))
     road_label = map_route_to_road_label(route_code)
     crash_date = parse_fars_date(crash_row)
+
+
+
+    state_code = str(crash_row["STATE"]).zfill(2)
+    state_name = crash_row.get("STATENAME")
+    if state_name is None:
+        state_name = STATE_FIPS_MAP.get(state_code, "ERROR")
+
+    county_code = str(crash_row["COUNTY"]).zfill(3)
+
+    fars_city_code = str(crash_row["CITY"]).zfill(4)
+    fars_city_name = crash_row.get("CITYNAME")
+
+    if (
+        fars_city_code == "0000"
+        or fars_city_code >= "9000"
+        or fars_city_name == "Not Applicable"
+    ):
+        fars_city_name = "Unincorporated"
+
+    if fars_city_name is None:
+        fars_city_name = glc_lookup.get((state_code, fars_city_code))
+
+    #city_name = parse_fars_city(fars_city_name, state_name)
+    if fars_city_name is None:
+        fars_city_name = "ERROR"
 
     return {
         "st_case": crash_row["ST_CASE"],
         "year": file_year,
         "crash_date": crash_date,
-        "state": int(crash_row["STATE"]),
-        "state_name": crash_row.get("STATENAME"),
-        "county": int(crash_row["COUNTY"]),
+        "state": state_code,
+        "state_name": state_name,
+        "county": county_code,
         "county_name": crash_row.get("COUNTYNAME"),
-        "city": int(crash_row["CITY"]),
-        "city_name": crash_row.get("CITYNAME"),
+        "city": fars_city_code,
+        "fars_city_name": fars_city_name,
         "route_code": route_code,
         "road_label": road_label,
         "total_fatalities": int(crash_row.get("FATALS", 0)),
@@ -77,7 +108,7 @@ def insert_fars_crash(conn: Connection, record: dict) -> bool:
     """
 
     insert_query = sql.SQL("""
-        INSERT INTO fars_crashes_clean (
+        INSERT INTO fars_crashes (
             st_case, 
             year,
             crash_date, 
@@ -86,7 +117,7 @@ def insert_fars_crash(conn: Connection, record: dict) -> bool:
             county,
             county_name,
             city,
-            city_name,
+            fars_city_name,
             route_code,
             road_label, 
             total_fatalities, 
@@ -101,7 +132,7 @@ def insert_fars_crash(conn: Connection, record: dict) -> bool:
             %(county)s,
             %(county_name)s,
             %(city)s,
-            %(city_name)s,
+            %(fars_city_name)s,
             %(route_code)s,
             %(road_label)s,
             %(total_fatalities)s,
@@ -166,9 +197,12 @@ def load_fars_crash_rows(
     batch_skipped = 0
     batch_errors = 0
 
+    glc_lookup = load_glc_lookup(conn)
+
     for idx, row in enumerate(reader, start=1):
         batch_processed += 1
         record = assemble_fars_crash(
+                    glc_lookup=glc_lookup,
                     file_year=file_year,
                     crash_row=row,
         )
@@ -194,7 +228,7 @@ def load_fars_crash_rows(
                 batch_skipped += 1
             if idx % BATCH_SIZE == 0:
                 conn.commit()
-                logger.info(
+                logger.debug(
                     "(batch committed) +%s processed | +%s inserted | +%s skipped | +%s errors",
                     batch_processed,
                     batch_inserted,
@@ -230,9 +264,27 @@ def load_fars_crash_year(file_path: Path, year: int) -> tuple[int, int, int]:
     else:
         elapsed = time.time() - start
         logger.info(
-            f"[FARS] Completed loading {year}. "
+            f"[FARS] Completed loading {year} crashes. "
             f"Inserted={insert_count}, skipped={skip_count}, errors={error_count}, "
             f"duration={elapsed:.2f}s"
         )
         return insert_count, skip_count, error_count
+
+def retrieve_glc_city_name(conn: Connection, state_code: str, fars_city_code: str) -> str:
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT fars_city_name
+            FROM fars_city_codes
+            WHERE state_code = %s AND fars_city_code = %s
+            """,
+            (state_code, fars_city_code)
+        )
+        row = cur.fetchone()
+        return row[0] if row else "ERROR"
     
+
+def load_glc_lookup(conn) -> dict:
+    with conn.cursor() as cur:
+        cur.execute("SELECT state_code, fars_city_code, fars_city_name FROM fars_city_codes")
+        return {(row[0], row[1]): row[2] for row in cur.fetchall()}

@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS fars_crashes CASCADE;
+DROP TABLE IF EXISTS fars_persons CASCADE;
+
