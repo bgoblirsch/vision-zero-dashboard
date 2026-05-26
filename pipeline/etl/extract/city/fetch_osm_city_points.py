@@ -37,7 +37,7 @@ def main():
                 JOIN city_stats cs 
                     ON cp.state_fips = cs.state_fips 
                     AND cp.place_fips = cs.place_fips
-                WHERE cs.population > 50000
+                WHERE cs.population > 100000
                 ORDER BY cp.state_fips, cp.place_fips
             """)
             places = cur.fetchall()

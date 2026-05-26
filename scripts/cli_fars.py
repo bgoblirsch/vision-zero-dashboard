@@ -1,5 +1,6 @@
 import argparse
 import subprocess
+import time
 from pathlib import Path
 
 from pipeline.etl.fars_pipeline import run_fars_pipeline
@@ -16,6 +17,7 @@ def run_fars_validation() -> None:
     )
 
 def main() -> None:
+    start = time.time()
     parser = argparse.ArgumentParser(description="Run FARS pipeline")
     parser.add_argument(
         "--raw-root",
@@ -57,6 +59,9 @@ def main() -> None:
         raw_root=args.raw_root,
         requested_years=args.years,
     )
+
+    elapsed = time.time() - start
+    logger.info("[PIPELINE][FARS] Finished running FARS pipeline. Duration: %.2fs", elapsed)
 
 if __name__ == "__main__":
     main()

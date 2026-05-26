@@ -2,8 +2,11 @@ import { useState } from "react"
 
 import { useCrashPoints } from "./hooks/useCrashPoints"
 import { useCities } from "./hooks/useCities"
+import { useCrashesMeta } from "./hooks/useCrashesMeta"
+
 import CrashMap from "./components/Map"
 import DataPane from "./components/DataPane"
+
 import "./styles/App.css"
 
 
@@ -15,11 +18,12 @@ function App() {
   const [vzFilter, setVzFilter] = useState(new Set(["vz", "non-vz"]))
 
   const { cities, loading: citiesLoading, error: citiesError } = useCities()
+  const { meta: crashesMeta } = useCrashesMeta()
   const { crashPoints, loading: pointsLoading, error: pointsError } = useCrashPoints(
     selectedCity?.state_fips,
     selectedCity?.place_fips
   )
-
+  
   const handleCitySelect = (city) => {
     setSelectedCity(city)
     setSelectedCrash(null)
@@ -33,6 +37,10 @@ function App() {
   }
 
   const handleVzFilterChange = (value) => {
+    if (value === "reset") {
+        setVzFilter(new Set(["vz", "non-vz"]))
+        return
+    }
     setVzFilter(prev => {
       const next = new Set(prev)
       if (next.has(value)) {
@@ -78,6 +86,7 @@ function App() {
           onFatalityFilterChange={setFatalityFilter}
           onCitySelect={handleCitySelect}
           onClearCity={handleClearCity}
+          crashesMeta={crashesMeta}
         />
       </div>
     </div>

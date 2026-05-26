@@ -9,6 +9,7 @@ from pipeline.etl.load.load_fars_persons import load_fars_person_year
 
 from pipeline.etl.transform.derive_fars_person_subtypes import run_derive_fars_subtypes
 from pipeline.etl.transform.derive_city_stats import run_derive_city_stats
+from pipeline.etl.transform.derive_city_rankings import run_derive_city_rankings
 
 from pipeline.etl.enrich.enrich_crash_locations import enrich_crash_locations
 
@@ -90,5 +91,8 @@ def run_fars_pipeline(
 
     # Derive 5 year avg data for cities
     run_derive_city_stats()
+
+    # rank cities
+    run_derive_city_rankings()
 
     logger.info("[PIPELINE][FARS] Pipeline completed successfully")

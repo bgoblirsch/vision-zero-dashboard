@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { fetchCities } from "../api/cities"
 
-export function useCities(minPopulation = 50000) {
+export function useCities(minPopulation = 100000) {
     const [cities, setCities] = useState([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)

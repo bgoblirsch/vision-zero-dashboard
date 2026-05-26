@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS city_stats CASCADE;
+DROP TABLE IF EXISTS census_places CASCADE;
+

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/cities", tags=["cities"])
 
 
 @router.get("")
-def get_cities(min_population: int = 50000):
+def get_cities(min_population: int = 100000):
     """Return cities, their locations, and their stats."""
     query = """
         SELECT
@@ -36,7 +36,39 @@ def get_cities(min_population: int = 50000):
             stats.trend_pct_change,
             stats.trend_pct_change_pedestrian,
             stats.trend_pct_change_cyclist,
-            stats.trend_pct_change_motorist
+            stats.trend_pct_change_motorist,
+            stats.rank_per_100k_all,
+            stats.rank_per_100k_pedestrian_all,
+            stats.rank_per_100k_cyclist_all,
+            stats.rank_per_100k_motorist_all,
+            stats.rank_trend_all,
+            stats.rank_trend_pedestrian_all,
+            stats.rank_trend_cyclist_all,
+            stats.rank_trend_motorist_all,
+            stats.pct_per_100k_all,
+            stats.pct_per_100k_pedestrian_all,
+            stats.pct_per_100k_cyclist_all,
+            stats.pct_per_100k_motorist_all,
+            stats.pct_trend_all,
+            stats.pct_trend_pedestrian_all,
+            stats.pct_trend_cyclist_all,
+            stats.pct_trend_motorist_all,
+            stats.rank_per_100k_vz,
+            stats.rank_per_100k_pedestrian_vz,
+            stats.rank_per_100k_cyclist_vz,
+            stats.rank_per_100k_motorist_vz,
+            stats.rank_trend_vz,
+            stats.rank_trend_pedestrian_vz,
+            stats.rank_trend_cyclist_vz,
+            stats.rank_trend_motorist_vz,
+            stats.pct_per_100k_vz,
+            stats.pct_per_100k_pedestrian_vz,
+            stats.pct_per_100k_cyclist_vz,
+            stats.pct_per_100k_motorist_vz,
+            stats.pct_trend_vz,
+            stats.pct_trend_pedestrian_vz,
+            stats.pct_trend_cyclist_vz,
+            stats.pct_trend_motorist_vz
         FROM census_places places
         JOIN city_stats stats
             ON places.state_fips = stats.state_fips
@@ -56,7 +88,7 @@ def get_cities(min_population: int = 50000):
     except Exception as e:
         logger.error("get_cities failed: %s", e)
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 
 @router.get("/{state_fips}/{place_fips}/extent")
 def get_city_extent(state_fips: str, place_fips: str):

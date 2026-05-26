@@ -24,9 +24,9 @@ const CITY_LEGEND_ITEMS = [
 ]
 
 const CRASH_LEGEND_ITEMS = [
-    { key: "motorist", color: FATALITY_COLORS.motorist, label: "Motorist & other" },
-    { key: "pedestrian", color: FATALITY_COLORS.pedestrian, label: "Includes pedestrian fatality" },
-    { key: "cyclist", color: FATALITY_COLORS.cyclist, label: "Includes cyclist fatality" },
+    { key: "motorist", color: FATALITY_COLORS.motorist, label: "Motorist & other fatality" },
+    { key: "pedestrian", color: FATALITY_COLORS.pedestrian, label: "Pedestrian fatality" },
+    { key: "cyclist", color: FATALITY_COLORS.cyclist, label: "Cyclist fatality" },
 ]
 
 const dotStyle = (color) => ({
@@ -132,9 +132,7 @@ export default function CrashMap({
             return
         }
 
-        const minPop = viewState.zoom < 5 ? 200000
-                 : viewState.zoom < 7 ? 100000
-                 : 50000
+        const minPop = 100000
 
         const visibleCities = cities.filter(city =>
             (city.is_vision_zero || city.population >= minPop) &&
@@ -200,10 +198,16 @@ export default function CrashMap({
         getPosition: d => [d.lon, d.lat],
         getRadius: 6,
         radiusUnits: "pixels",
-        getFillColor: d => d.pedestrian_fatalities > 0 ? FATALITY_COLORS_RGB.pedestrian : 
-                           d.cyclist_fatalities > 0 ? FATALITY_COLORS_RGB.cyclist : 
-                           FATALITY_COLORS_RGB.motorist,
-        pickable: true,
+        getFillColor: d => {
+            if (fatalityFilter === "pedestrian") return FATALITY_COLORS_RGB.pedestrian
+            if (fatalityFilter === "cyclist")    return FATALITY_COLORS_RGB.cyclist
+            if (fatalityFilter === "motorist")   return FATALITY_COLORS_RGB.motorist
+            // "all" filter: color by dominant fatality type
+            if (d.pedestrian_fatalities > 0)     return FATALITY_COLORS_RGB.pedestrian
+            if (d.cyclist_fatalities > 0)        return FATALITY_COLORS_RGB.cyclist
+            return FATALITY_COLORS_RGB.motorist
+        },
+                pickable: true,
         maskId: "city-mask-layer",
         onClick: ({ object }) => {
             if (object) onCrashSelect({

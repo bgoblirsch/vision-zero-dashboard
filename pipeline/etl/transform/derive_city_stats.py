@@ -123,11 +123,37 @@ def derive_city_stats(conn: Connection) -> tuple[int, int]:
         AND city_stats.place_fips = csc.place_fips
     """
 
+    zero_crash_query = """
+        UPDATE city_stats cs
+        SET
+            avg_fatalities_5yr          = 0,
+            avg_5yr_pedestrian          = 0,
+            avg_5yr_cyclist             = 0,
+            avg_5yr_motorist            = 0,
+            avg_per_100k_5yr            = 0,
+            avg_per_100k_pedestrian     = 0,
+            avg_per_100k_cyclist        = 0,
+            avg_per_100k_motorist       = 0
+        FROM census_places cp
+        WHERE cs.state_fips = cp.state_fips
+        AND cs.place_fips = cp.place_fips
+        AND (cs.population >= 100000 OR cp.is_vision_zero = TRUE)
+        AND cs.avg_per_100k_5yr IS NULL
+    """
+
+
     try:
         with conn.cursor() as cur:
             cur.execute(query)
             updated_count = cur.rowcount
         conn.commit()
+
+        with conn.cursor() as cur:
+            cur.execute(zero_crash_query)
+            zero_count = cur.rowcount
+            logger.info("[PIPELINE][TRANSFORM] Encountered %s cities with no fatal crashes in the last 5 years.", zero_count)
+        conn.commit()
+
         return updated_count, 0
     except Exception:
         conn.rollback()

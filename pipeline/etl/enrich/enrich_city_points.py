@@ -9,17 +9,17 @@ from pipeline.logger import get_logger
 logger = get_logger(__name__)
 
 KNOWN_CITY_ISSUES_MAP = {
-    "Athens-Clarke County unified government (balance)": {-83.375809, 33.935479},
-    "Augusta-Richmond County consolidated government (balance)": {-81.968841, 33.4711351},
-    "Louisville/Jefferson County metro government (balance)": {-85.754692, 38.250913},
-    "Nashville-Davidson metropolitan government (balance)": {-86.78211, 36.16129},
-    "Florence-Graham": {-118.24336, 33.96733},
-    "Macon-Bibb County": {-83.62853, 32.83435},
-    "Urban Honolulu": {-157.8592, 21.30899},
-    "Indianapolis": {-86.15802, 39.76847},
-    "Methuen Town": {-71.19088, 42.72607},
-    "Weymouth Town": {-70.9369, 42.21747},
-    "Tonawanda Town": {-78.87973, 43.01837},
+    "Athens-Clarke County unified government (balance)": (-83.375809, 33.935479),
+    "Augusta-Richmond County consolidated government (balance)": (-81.968841, 33.4711351),
+    "Louisville/Jefferson County metro government (balance)": (-85.754692, 38.250913),
+    "Nashville-Davidson metropolitan government (balance)": (-86.78211, 36.16129),
+    "Florence-Graham": (-118.24336, 33.96733),
+    "Macon-Bibb County": (-83.62853, 32.83435),
+    "Urban Honolulu": (-157.8592, 21.30899),
+    "Indianapolis": (-86.15802, 39.76847),
+    "Methuen Town": (-71.19088, 42.72607),
+    "Weymouth Town": (-70.9369, 42.21747),
+    "Tonawanda Town": (-78.87973, 43.01837),
 }
 
 

@@ -6,6 +6,25 @@ from backend.logger import get_logger
 logger = get_logger(__name__)
 
 router = APIRouter(prefix="/crashes", tags=["crashes"])
+
+
+@router.get("/meta")
+def get_crashes_meta():
+    """Return metadata about the FARS dataset, including year range."""
+    query = """
+        SELECT MIN(year) AS min_year, MAX(year) AS max_year
+        FROM fars_crashes
+    """
+    try:
+        with get_conn() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query)
+                row = cur.fetchone()
+                assert row is not None
+                return {"min_year": row[0], "max_year": row[1]}
+    except Exception as e:
+        logger.error("get_crashes_meta failed: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
     
 
 @router.get("/{state_fips}/{place_fips}/by-year")
