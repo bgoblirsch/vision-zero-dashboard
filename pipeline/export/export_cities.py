@@ -1,9 +1,19 @@
 import json
 from pathlib import Path
-from connection import get_conn
-from logger import get_logger
+from decimal import Decimal
+
+from pipeline.connection import get_conn
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
+
+def _serialize(val):
+    """Handle date serialization for JSON."""
+    if isinstance(val, Decimal):
+        return float(val)
+    if hasattr(val, "isoformat"):
+        return val.isoformat()
+    return val
 
 def export_cities(out_dir: Path, min_population: int = 100000):
     query = """
@@ -77,7 +87,10 @@ def export_cities(out_dir: Path, min_population: int = 100000):
                 columns = [desc[0] for desc in cur.description]
                 rows = cur.fetchall()
 
-        cities = [dict(zip(columns, row)) for row in rows]
+        cities = [
+            {col: _serialize(val) for col, val in zip(columns, row)}
+            for row in rows
+        ]
 
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "cities.json"

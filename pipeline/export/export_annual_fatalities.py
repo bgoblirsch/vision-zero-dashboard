@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
-from connection import get_conn
-from logger import get_logger
+
+from pipeline.connection import get_conn
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -51,7 +52,7 @@ def export_annual_fatalities(out_dir: Path, min_population: int = 100000):
                 out_path.write_text(json.dumps(data))
 
                 if i % 50 == 0 or i == total:
-                    logger.info("[EXPORT] Annual fatality data exported for %d/%d cities", i, total)
+                    logger.info("[EXPORT] Annual fatality export progress: %d/%d cities", i, total)
 
     except Exception as e:
         logger.error("[EXPORT] export_annual_fatalities failed: %s", e)

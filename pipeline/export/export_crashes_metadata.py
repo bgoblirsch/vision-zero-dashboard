@@ -1,7 +1,8 @@
 import json
 from pathlib import Path
-from connection import get_conn
-from logger import get_logger
+
+from pipeline.connection import get_conn
+from pipeline.logger import get_logger
 
 logger = get_logger(__name__)
 
