@@ -1,6 +1,6 @@
 # Vision Zero Dashboard
 
-A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero[(https://visionzeronetwork.org/)–style safety analysis for large cities. 
+A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero](https://visionzeronetwork.org/)–style safety analysis for large cities. 
 
 Includes a custom interactive dashboard built FARS data, featuring per-capita fatality rates, trend analysis, and cross city rankings for U.S. cities with a population greater than 100,000 and all Vision Zero cities. 
 
@@ -98,7 +98,6 @@ Ingests U.S. city boundaries, population data, and point locations used for map 
 1. **Load city boundaries** — TIGER/Line shapefiles ingested into PostGIS as polygon geometries
 2. **Load population data** — ACS 5-year estimates joined to city records
 3. **Enrich city point locations** — representative point computed or resolved via OpenStreetMap/Nominatim for map rendering
-
 
 ### High-level flow
 
