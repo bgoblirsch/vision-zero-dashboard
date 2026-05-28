@@ -212,18 +212,23 @@ python scripts/cli_fars.py
 
 Run specific years:
 ```bash
-python src/etl/run_fars_pipeline.py --years 1995 1996 1997
+python scripts/cli_fars.py --years 1995 1996 1997
 ```
 
 Run enrichment only 
 (assign city data to points that are missing city data but fall within a census place boundary):
 ```bash
-python src/etl/run_fars_pipeline.py --enrich-only
+python scripts/cli_fars.py --enrich-only
 ```
 
 Validate only:
 ```bash
-python src/etl/run_fars_pipeline.py --validate-only
+python scripts/cli_fars.py --validate-only
+```
+
+Export geojson products:
+```bash 
+python -m pipeline.export.run_export
 ```
 
 Reset the city pipeline and fars pipeline tables:
