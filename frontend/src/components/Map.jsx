@@ -135,6 +135,8 @@ export default function CrashMap({
     const [cityBoundary, setCityBoundary] = useState(null)
     const [clusters, setClusters] = useState([])
 
+
+
     useEffect(() => {
         if (!cities.length) return
         const points = cities.map(city => ({
@@ -365,7 +367,7 @@ export default function CrashMap({
                 {selectedCity && (
                     <div className="map-history-control">
                         <span className="map-years-indicator">
-                            {allYearsLoaded ? `2001–${maxYear}` : `${maxYear - 4}–${maxYear}`}
+                            {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
                         </span>
                         <button
                             className="map-history-btn"

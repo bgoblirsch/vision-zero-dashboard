@@ -8,6 +8,10 @@ export async function fetchCrashesMeta() {
 
 export async function fetchCrashPointsForYear(stateFips, placeFips, year) {
     const res = await fetch(`${BASE_URL}/crashes/${stateFips}/${placeFips}/${year}.json`)
+    if (res.status === 404) {
+        console.warn(`Missing crash file: ${stateFips}/${placeFips}/${year}.json`)
+        return []
+    }
     if (!res.ok) throw new Error(`Failed to fetch crash points for ${year}`)
     return res.json()
 }

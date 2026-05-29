@@ -8,12 +8,20 @@ export async function fetchCities() {
 
 export async function fetchCityCrashesByYear(stateFips, cityFips) {
     const res = await fetch(`${BASE_URL}/cities/${stateFips}/${cityFips}/annual_fatalities.json`)
+    if (res.status === 404) {
+        console.warn(`Missing annual fatalities file: ${stateFips}/${cityFips}/annual_fatalities.json`)
+        return []
+    }
     if (!res.ok) throw new Error("Failed to fetch city data")
     return res.json()
 }
 
 export async function fetchCityBoundary(stateFips, placeFips) {
     const res = await fetch(`${BASE_URL}/cities/${stateFips}/${placeFips}/boundary.geojson`)
+    if (res.status === 404) {
+        console.warn(`Missing boundary file: ${stateFips}/${placeFips}/boundary.geojson`)
+        return []
+    }
     if (!res.ok) throw new Error("Failed to fetch city boundary")
     return res.json()
 }
