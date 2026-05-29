@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react"
-import { fetchCityCrashesByYear } from "../api/crashes"
-
+import { fetchCityCrashesByYear } from "../api/cities"
 
 function fillYearGaps(data, minYear,maxYear) {
     const byYear = Object.fromEntries(data.map(d => [d.year, d]))
@@ -17,7 +16,6 @@ function fillYearGaps(data, minYear,maxYear) {
     }
     return result
 }
-
 
 export function useCityByYear(stateFips, placeFips, minYear, maxYear) {
     const [yearData, setYearData] = useState([])

@@ -1,23 +1,25 @@
-const BASE_URL = "http://localhost:8000"
-
-
-export async function fetchCityCrashesByYear(stateFips, cityFips) {
-    const res = await fetch(`${BASE_URL}/crashes/${stateFips}/${cityFips}/by-year`)
-    if (!res.ok) throw new Error("Failed to fetch city data")
-    return res.json()
-}
-
-
-export async function fetchCrashPoints(stateFips, placeFips) {
-    const res = await fetch(`${BASE_URL}/crashes/${stateFips}/${placeFips}`)
-    if (!res.ok) throw new Error("Failed to fetch crash points")
-    const data = await res.json()
-    return data
-}
-
+const BASE_URL = import.meta.env.VITE_R2_PUBLIC_URL
 
 export async function fetchCrashesMeta() {
-    const res = await fetch(`${BASE_URL}/crashes/meta`)
+    const res = await fetch(`${BASE_URL}/crashes_metadata.json`)
     if (!res.ok) throw new Error("Failed to fetch crashes meta")
     return res.json()
+}
+
+export async function fetchCrashPointsForYear(stateFips, placeFips, year) {
+    const res = await fetch(`${BASE_URL}/crashes/${stateFips}/${placeFips}/${year}.json`)
+    if (res.status === 404) {
+        console.warn(`Missing crash file: ${stateFips}/${placeFips}/${year}.json`)
+        return []
+    }
+    if (!res.ok) throw new Error(`Failed to fetch crash points for ${year}`)
+    return res.json()
+}
+
+export async function fetchRecentCrashPoints(stateFips, placeFips, maxYear, count = 5) {
+    const years = Array.from({ length: count }, (_, i) => maxYear - i)
+    const results = await Promise.all(
+        years.map(year => fetchCrashPointsForYear(stateFips, placeFips, year))
+    )
+    return results.flat()
 }

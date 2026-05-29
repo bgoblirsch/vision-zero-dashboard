@@ -9,6 +9,7 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon"
 
 import "../styles/Map.css"
 import EyeIcon from "./EyeIcon"
+import { fetchCityBoundary } from "../api/cities"
 import { FATALITY_COLORS, FATALITY_COLORS_RGB, VZ_COLORS, VZ_COLORS_RGB } from "../constants/colors"
 
 const CONT_US_BOUNDS = {
@@ -45,6 +46,25 @@ const supercluster = new Supercluster({
     maxZoom: 14,
 })
 
+function getExtentFromGeometry(geometry) {
+    const coords = []
+    const collect = (geom) => {
+        if (geom.type === "Polygon") {
+            geom.coordinates[0].forEach(c => coords.push(c))
+        } else if (geom.type === "MultiPolygon") {
+            geom.coordinates.forEach(poly => poly[0].forEach(c => coords.push(c)))
+        }
+    }
+    collect(geometry)
+    const lons = coords.map(c => c[0])
+    const lats = coords.map(c => c[1])
+    return {
+        min_lon: Math.min(...lons),
+        max_lon: Math.max(...lons),
+        min_lat: Math.min(...lats),
+        max_lat: Math.max(...lats),
+    }
+}
 
 function getClusterExpansionViewState(clusterId, currentViewState) {
     const leaves = supercluster.getLeaves(clusterId, Infinity)
@@ -60,7 +80,6 @@ function getClusterExpansionViewState(clusterId, currentViewState) {
     )
     return { ...currentViewState, longitude, latitude, zoom } 
 }
-
 
 function getInitialViewState() {
     const { innerWidth, innerHeight } = window
@@ -80,7 +99,6 @@ function getInitialViewState() {
     }
 }
 
-
 function LegendRow({ color, label, visible, onToggle }) {
     return (
         <div
@@ -95,7 +113,6 @@ function LegendRow({ color, label, visible, onToggle }) {
     )
 }
 
-
 export default function CrashMap({ 
     crashPoints, 
     cities, 
@@ -108,20 +125,24 @@ export default function CrashMap({
     onVzFilterChange,
     fatalityFilter,
     onFatalityFilterChange,
-    onCrashDeselect
+    onCrashDeselect,
+    loadedYears,
+    loadYear,
+    pointsLoading,
+    maxYear,
 }) {
     const [viewState, setViewState] = useState(getInitialViewState)
     const [cityBoundary, setCityBoundary] = useState(null)
     const [clusters, setClusters] = useState([])
+
+
 
     useEffect(() => {
         if (!cities.length) return
         const points = cities.map(city => ({
             type: "Feature",
             geometry: { type: "Point", coordinates: [city.lon, city.lat] },
-            properties: {
-                ...city,
-            }
+            properties: { ...city }
         }))
         supercluster.load(points)
     }, [cities])
@@ -132,10 +153,8 @@ export default function CrashMap({
             return
         }
 
-        const minPop = 100000
-
         const visibleCities = cities.filter(city =>
-            (city.is_vision_zero || city.population >= minPop) &&
+            (city.is_vision_zero || city.population >= 100000) &&
             (city.is_vision_zero ? vzFilter.has("vz") : vzFilter.has("non-vz"))
         )
 
@@ -164,29 +183,36 @@ export default function CrashMap({
 
         const { state_fips, place_fips } = selectedCity
 
-        // fetch extent and zoom
-        fetch(`${BASE_URL}/cities/${state_fips}/${place_fips}/extent`)
-            .then(res => res.json())
-            .then(ext => {
-                const viewport = new WebMercatorViewport({ width: window.innerWidth, height: window.innerHeight })
+        fetchCityBoundary(state_fips, place_fips)
+            .then(boundary => {
+                setCityBoundary(boundary)
+                const ext = getExtentFromGeometry(boundary.geometry)
+                const viewport = new WebMercatorViewport({
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                })
                 const { longitude, latitude, zoom } = viewport.fitBounds(
                     [[ext.min_lon, ext.min_lat], [ext.max_lon, ext.max_lat]],
-                    { padding: {
-                        left: 350,
-                        right: 350,
-                        top: 20,
-                        bottom: 20
-                    } }
+                    { padding: { left: 350, right: 350, top: 20, bottom: 20 } }
                 )
                 setViewState(v => ({ ...v, longitude, latitude, zoom }))
             })
-
-        // fetch boundary
-        fetch(`${BASE_URL}/cities/${state_fips}/${place_fips}/boundary`)
-            .then(res => res.json())
-            .then(setCityBoundary)
-
     }, [selectedCity])
+
+    const remainingYears = maxYear
+        ? Array.from(
+            { length: maxYear - 2001 - 4 },
+            (_, i) => maxYear - 5 - i
+          ).filter(y => y >= 2001 && !loadedYears.includes(y))
+        : []
+
+    const allYearsLoaded = remainingYears.length === 0
+
+    const handleLoadFullHistory = async () => {
+        for (const year of remainingYears) {
+            await loadYear(year)
+        }
+    }
 
     const filteredCrashPoints = fatalityFilter === "all"
         ? crashPoints
@@ -202,12 +228,11 @@ export default function CrashMap({
             if (fatalityFilter === "pedestrian") return FATALITY_COLORS_RGB.pedestrian
             if (fatalityFilter === "cyclist")    return FATALITY_COLORS_RGB.cyclist
             if (fatalityFilter === "motorist")   return FATALITY_COLORS_RGB.motorist
-            // "all" filter: color by dominant fatality type
             if (d.pedestrian_fatalities > 0)     return FATALITY_COLORS_RGB.pedestrian
             if (d.cyclist_fatalities > 0)        return FATALITY_COLORS_RGB.cyclist
             return FATALITY_COLORS_RGB.motorist
         },
-                pickable: true,
+        pickable: true,
         maskId: "city-mask-layer",
         onClick: ({ object }) => {
             if (object) onCrashSelect({
@@ -257,7 +282,7 @@ export default function CrashMap({
         id: "city-boundary-layer",
         data: {
             type: "Feature",
-            geometry: cityBoundary.geom,
+            geometry: cityBoundary.geometry,
             properties: {},
         },
         filled: true,
@@ -328,7 +353,7 @@ export default function CrashMap({
                                 return
                             }
                             const point = { type: "Feature", geometry: { type: "Point", coordinates: coordinate } }
-                            const polygon = { type: "Feature", geometry: cityBoundary.geom }
+                            const polygon = { type: "Feature", geometry: cityBoundary.geometry }
                             if (!booleanPointInPolygon(point, polygon)) {
                                 onClearCity()
                             }
@@ -338,39 +363,55 @@ export default function CrashMap({
             >
                 <Map mapStyle={MAP_STYLE} />
             </DeckGL>
-            <div className="map-legend">
-                <div className="map-legend-title" style={{ position: "relative", textAlign: "center" }}>
-                    {selectedCity && fatalityFilter !== "all" && (
-                        <span
-                            style={{ color: "#7db8f7", position: "absolute", left: -5, fontSize: "9px", letterSpacing: "0.06em", cursor: "pointer" }}
-                            onClick={() => onFatalityFilterChange("all")}
-                        >
-                            RESET
+            <div className="map-bottom-left">
+                {selectedCity && (
+                    <div className="map-history-control">
+                        <span className="map-years-indicator">
+                            {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
                         </span>
-                    )}
-                    <span>{selectedCity ? "Crash Type" : "Vision Zero Status"}</span>
-                </div>
-                {selectedCity ? (
-                    CRASH_LEGEND_ITEMS.map(({ key, color, label }) => (
-                        <LegendRow
-                            key={key}
-                            color={color}
-                            label={label}
-                            visible={fatalityFilter === "all" || fatalityFilter === key}
-                            onToggle={() => onFatalityFilterChange(fatalityFilter === key ? "all" : key)}
-                        />
-                    ))
-                ) : (
-                    CITY_LEGEND_ITEMS.map(({ key, color, label }) => (
-                        <LegendRow
-                            key={key}
-                            color={color}
-                            label={label}
-                            visible={vzFilter.has(key)}
-                            onToggle={() => onVzFilterChange(key)}
-                        />
-                    ))
+                        <button
+                            className="map-history-btn"
+                            onClick={handleLoadFullHistory}
+                            disabled={allYearsLoaded || pointsLoading}
+                        >
+                            {pointsLoading ? "Loading..." : allYearsLoaded ? "Full history loaded" : "Load full history"}
+                        </button>
+                    </div>
                 )}
+                <div className="map-legend">
+                    <div className="map-legend-title" style={{ position: "relative", textAlign: "center" }}>
+                        {selectedCity && fatalityFilter !== "all" && (
+                            <span
+                                style={{ color: "#7db8f7", position: "absolute", left: -5, fontSize: "9px", letterSpacing: "0.06em", cursor: "pointer" }}
+                                onClick={() => onFatalityFilterChange("all")}
+                            >
+                                RESET
+                            </span>
+                        )}
+                        <span>{selectedCity ? "Crash Type" : "Vision Zero Status"}</span>
+                    </div>
+                    {selectedCity ? (
+                        CRASH_LEGEND_ITEMS.map(({ key, color, label }) => (
+                            <LegendRow
+                                key={key}
+                                color={color}
+                                label={label}
+                                visible={fatalityFilter === "all" || fatalityFilter === key}
+                                onToggle={() => onFatalityFilterChange(fatalityFilter === key ? "all" : key)}
+                            />
+                        ))
+                    ) : (
+                        CITY_LEGEND_ITEMS.map(({ key, color, label }) => (
+                            <LegendRow
+                                key={key}
+                                color={color}
+                                label={label}
+                                visible={vzFilter.has(key)}
+                                onToggle={() => onVzFilterChange(key)}
+                            />
+                        ))
+                    )}
+                </div>
             </div>
             {selectedCrash && (
                 <div className="crash-overlay">

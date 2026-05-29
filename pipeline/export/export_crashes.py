@@ -49,8 +49,14 @@ def export_crashes(out_dir: Path, min_population: int = 100000):
     try:
         with get_conn() as conn:
             with conn.cursor() as cur:
+                cur.execute("SELECT MAX(year) FROM fars_crashes")
+                max_year_result = cur.fetchone()
+                assert max_year_result is not None
+                max_year = max_year_result[0]
+
                 cur.execute(query_cities, {"min_population": min_population})
                 cities = cur.fetchall()
+
 
             total = len(cities)
             for i, (state_fips, place_fips) in enumerate(cities, 1):
@@ -68,6 +74,13 @@ def export_crashes(out_dir: Path, min_population: int = 100000):
 
                 city_dir = out_dir / "crashes" / state_fips / place_fips
                 city_dir.mkdir(parents=True, exist_ok=True)
+
+                all_years = range(2001, max_year + 1)
+                for year in all_years:
+                    out_path = city_dir / f"{year}.json"
+                    if not out_path.exists():
+                        out_path.write_text("[]")
+
                 for year, points in by_year.items():
                     out_path = city_dir / f"{year}.json"
                     out_path.write_text(json.dumps(points))
