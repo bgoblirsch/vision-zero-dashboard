@@ -1,5 +1,7 @@
 # Vision Zero Dashboard
 
+**[https://visionzerodata.com](https://visionzerodata.com)**
+
 A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero](https://visionzeronetwork.org/)–style safety analysis for large cities. 
 
 Includes a custom interactive dashboard built FARS data, featuring per-capita fatality rates, trend analysis, and cross city rankings for U.S. cities with a population greater than 100,000 and all Vision Zero cities. 
@@ -17,14 +19,11 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 - Python 3.12
 - psycopg (PostgreSQL driver)
 - tqdm (progress tracking)
+- boto3
 
 **Database**
 - PostgreSQL with PostGIS
 - Spatial indexes (GiST) on geometry columns
-
-**Backend**
-- FastAPI
-  -  Archived in alpha release; will be revived if the project expands to justify full backend hosting
 
 **Frontend**
 - React + Vite
@@ -60,11 +59,10 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 - Per-capita fatality rates and 5-year trend analysis
 - Cross-city rankings with Vision Zero peer comparisons
 - Interactive dashboard with map, city detail view, and fatality type filters
-
-**In Progress**
-- Static deployment refactor — replacing FastAPI backend with pre-generated JSON served via Cloudflare R2
+- Static Deployment: Cloudflare R2 serves static JSON data
 
 **Planned**
+- Mobile version
 - FIPS backfill for pre-2001 non-spatial crash data
   - would allow the city chart history to span back to 1987
 - Motorcycle fatality breakout filter
@@ -83,9 +81,16 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 
 ---
 
-## Pipeline Architecture
+## Architecture
 
-The pipeline uses an ETL pattern for ingestion, applying lightweight transforms inline during load, followed by post-load SQL transformations to derive city statistics and rankings.
+The pipeline uses an ETL pattern for ingestion, applying lightweight transforms inline during load, followed by post-load SQL transformations to derive city statistics and rankings, then exports pre-generated static JSON files uploaded to Cloudflare R2. The React frontend reads directly from R2 — there is no backend server.
+
+### R2 Static file shape
+crashes_metadata.json
+cities.json
+cities/{state_fips}/{place_fips}/annual_fatalities.json
+cities/{state_fips}/{place_fips}/boundary.geojson
+crashes/{state_fips}/{place_fips}/{year}.json
 
 ### Pipelines
 
@@ -102,16 +107,16 @@ Ingests U.S. city boundaries, population data, and point locations used for map 
 ### High-level flow
 
         ┌─────────────────────┐      ┌─────────────────────┐
-        │TIGER (SHP)/ACS (CSV)│      │     FARS Data       │
+        │     TIGER + ACS     │      │     FARS Data       │
         │  (Boundaries / Pop) │      │    (ZIP / CSV)      │
         └────────┬────────────┘      └──────────┬──────────┘
                  │                              │
                  ▼                              ▼
         ┌─────────────────────┐      ┌─────────────────────┐
         │   City Pipeline     │      │    Extract          │
-        │ - Boundaries        │      │ - Download by year  │
-        │ - Population        │      │ - Skip if exists    │
-        │ - Point locations   │      │ - Preserve raw files│
+        │ - Boundaries (shp)  │      │ - Download by year  │
+        │ - Population (CSV)  │      │ - Skip if exists    │
+        │ - City pt locations │      │ - Preserve raw files│
         └────────┬────────────┘      └──────────┬──────────┘
                  │                              │
                  ▼                              ▼
@@ -162,6 +167,13 @@ Ingests U.S. city boundaries, population data, and point locations used for map 
                      │  - Rank among all   │
                      │  - Rank among VZ    │
                      │  - Percentiles      │
+                     └──────────┬──────────┘
+                                |
+                                ▼
+                     ┌─────────────────────┐
+                     │  Export + Upload    │
+                     │  - Generate JSON    │
+                     │  - Upload to R2     │
                      └─────────────────────┘
 
 1. **Extract**
@@ -200,12 +212,12 @@ Ingests U.S. city boundaries, population data, and point locations used for map 
 Example (run locally with a configured PostgreSQL database):
 
 Run city pipeline (load city boundaries and population data).
-**Must be run before the fars pipeline.** Only needs to run every few years when updating population data.
+**Must be run before the FARS pipeline.** Only needs to run every few years when updating population data.
 ```bash
 python -m pipeline.etl.city_pipeline
 ```
 
-Run the full fars pipeline:
+Run the full FARS pipeline:
 ```bash
 python scripts/cli_fars.py 
 ```
@@ -226,12 +238,18 @@ Validate only:
 python scripts/cli_fars.py --validate-only
 ```
 
-Export geojson products:
+Export pipeline results to JSON:
+(declare output directory in the project .env file)
 ```bash 
 python -m pipeline.export.run_export
 ```
 
-Reset the city pipeline and fars pipeline tables:
+Upload to R2:
+```bash
+python -m pipeline.export.run_export
+```
+
+Reset the city pipeline and FARS pipeline tables:
 ```bash
 ENV=local bash scripts/reset_all_tables.sh
 ```
@@ -253,3 +271,5 @@ ENV=local bash scripts/reset_city_tables.sh
 - Schemas, interfaces, and assumptions may evolve as additional validation and analysis layers are added.
 
 - Raw FARS data is not included in this repository.
+
+- FastAPI backend archived in v0.1.0 release; can be revived if the project expands to justify full backend hosting.
