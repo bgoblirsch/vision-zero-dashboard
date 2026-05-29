@@ -48,7 +48,7 @@ def export_annual_fatalities(out_dir: Path, min_population: int = 100000):
 
                 city_dir = out_dir / "cities" / state_fips / place_fips
                 city_dir.mkdir(parents=True, exist_ok=True)
-                out_path = city_dir / "by-year.json"
+                out_path = city_dir / "annual_fatalities.json"
                 out_path.write_text(json.dumps(data))
 
                 if i % 50 == 0 or i == total:

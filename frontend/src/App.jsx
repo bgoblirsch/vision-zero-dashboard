@@ -19,9 +19,10 @@ function App() {
 
   const { cities, loading: citiesLoading, error: citiesError } = useCities()
   const { meta: crashesMeta } = useCrashesMeta()
-  const { crashPoints, loading: pointsLoading, error: pointsError } = useCrashPoints(
+  const { crashPoints, loadedYears, loadYear, loading: pointsLoading, error: pointsError } = useCrashPoints(
     selectedCity?.state_fips,
-    selectedCity?.place_fips
+    selectedCity?.place_fips,
+    crashesMeta?.max_year
   )
   
   const handleCitySelect = (city) => {
@@ -72,6 +73,10 @@ function App() {
           onVzFilterChange={handleVzFilterChange}
           onFatalityFilterChange={setFatalityFilter}
           onCrashDeselect={() => setSelectedCrash(null)}
+          loadedYears={loadedYears}
+          loadYear={loadYear}
+          pointsLoading={pointsLoading}
+          maxYear={crashesMeta?.max_year}
         />
       </div>
       <div style={{ flex: "0 0 40%", overflowY: "auto", borderLeft: "1px solid #e0e0e0" }}>
