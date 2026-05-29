@@ -52,7 +52,7 @@ function App() {
     })
   }
   
-  if (citiesLoading) return <p>Loading...</p>
+  if (citiesLoading || !crashesMeta) return <p>Loading...</p>
   if (pointsError) return <p>Error: {pointsError}</p>
   if (citiesError) return <p>Error: {citiesError}</p>
 
