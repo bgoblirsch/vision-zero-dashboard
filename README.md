@@ -2,7 +2,7 @@
 
 **[https://visionzerodata.com](https://visionzerodata.com)**
 
-A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero](https://visionzeronetwork.org/)–style safety analysis for large cities. 
+A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero](https://visionzeronetwork.org/) style safety analysis for large cities. 
 
 Includes a custom interactive dashboard built FARS data, featuring per-capita fatality rates, trend analysis, and cross city rankings for U.S. cities with a population greater than 100,000 and all Vision Zero cities. 
 

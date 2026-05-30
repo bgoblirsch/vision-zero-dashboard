@@ -4,7 +4,9 @@ import { useCityByYear } from "../hooks/useCityByYear"
 
 import CityMetricsPanel from "./CityMetricsPanel"
 import TrendIndicator from "./TrendIndicator"
+import AboutModal from "./AboutModal"
 import CityChart from "./CityChart"
+
 
 import "../styles/DataPane.css"
 
@@ -131,27 +133,22 @@ function DataPane({
                         </p>
                     </>
                 ) : (
-                    <>
-                        <p className="pane-subtitle">
-                            Select a city to view its <a href="https://www.nhtsa.gov/research-data/fatality-analysis-reporting-system-fars">FARS</a> crash history. Includes all <a href="https://visionzeronetwork.org/">Vision Zero</a> cities and non-Vision Zero cities with &gt; 100K people.
-                        </p>
-                        <div className="search-row">
-                            <input
-                                className="search-input"
-                                type="text"
-                                placeholder="Search cities..."
-                                value={searchInput}
-                                onChange={e => setSearchInput(e.target.value)}
-                                onKeyDown={handleSearchKeyDown}
-                            />
-                            <button
-                                className="search-button"
-                                onClick={() => setSearchQuery(searchInput.trim().toLowerCase())}
-                            >
-                                Search
-                            </button>
-                        </div>
-                    </>
+                    <div className="search-row">
+                        <input
+                            className="search-input"
+                            type="text"
+                            placeholder="Search cities..."
+                            value={searchInput}
+                            onChange={e => setSearchInput(e.target.value)}
+                            onKeyDown={handleSearchKeyDown}
+                        />
+                        <button
+                            className="search-button"
+                            onClick={() => setSearchQuery(searchInput.trim().toLowerCase())}
+                        >
+                            Search
+                        </button>
+                    </div>
                 )}
                 <div className="filter-row">
                     {FATALITY_FILTERS.map(f => (
@@ -295,6 +292,7 @@ function DataPane({
                     )
                 )}
             </div>
+            <AboutModal />
         </div>
     )
 }

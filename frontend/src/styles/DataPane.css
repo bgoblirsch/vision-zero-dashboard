@@ -22,6 +22,7 @@
     color: #f8fafc;
     margin: 0 0 4px 0;
     font-family: 'DM Mono', monospace;
+    margin: 4px 0px 16px;
 }
  
 .pane-subtitle {
@@ -35,6 +36,7 @@
 .content-area {
     flex: 1;
     overflow-y: auto;
+    border-bottom: 1px solid #1e2535;
 }
  
 /* Search */
@@ -55,7 +57,7 @@
     font-size: 12px;
     font-family: inherit;
     outline: none;
-    max-width: 400px;
+    max-width: 280px;
 }
  
 .search-button {
@@ -287,4 +289,16 @@
 
 .selected-city-row:hover {
     background-color: #151b28;
+}
+
+.about-trigger-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1px solid #2a3144;
+    font-size: 9px;
+    color: #9fa7b1;
 }
