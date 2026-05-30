@@ -46,6 +46,10 @@ const supercluster = new Supercluster({
     maxZoom: 14,
 })
 
+const CLUSTER_NAME_OVERRIDES = {
+    "San Jose": "Bay Area",
+}
+
 function getExtentFromGeometry(geometry) {
     const coords = []
     const collect = (geom) => {
@@ -315,8 +319,10 @@ export default function CrashMap({
                             a.properties.population > b.properties.population ? a : b
                         )
                         const count = leaves.length
+                        const name = largest.properties.display_name || largest.properties.place_name
+                        const label = CLUSTER_NAME_OVERRIDES[name] ?? `${name} Region`
                         return {
-                            html: `<div>${largest.properties.display_name || largest.properties.place_name} Region</div>`,
+                            html: `<div>${label}</div>`,
                             style: {
                                 backgroundColor: "white",
                                 padding: "4px 6px",
@@ -363,55 +369,53 @@ export default function CrashMap({
             >
                 <Map mapStyle={MAP_STYLE} />
             </DeckGL>
-            <div className="map-bottom-left">
-                {selectedCity && (
-                    <div className="map-history-control">
-                        <span className="map-years-indicator">
-                            {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
-                        </span>
-                        <button
-                            className="map-history-btn"
-                            onClick={handleLoadFullHistory}
-                            disabled={allYearsLoaded || pointsLoading}
-                        >
-                            {pointsLoading ? "Loading..." : allYearsLoaded ? "Full history loaded" : "Load full history"}
-                        </button>
-                    </div>
-                )}
-                <div className="map-legend">
-                    <div className="map-legend-title" style={{ position: "relative", textAlign: "center" }}>
-                        {selectedCity && fatalityFilter !== "all" && (
-                            <span
-                                style={{ color: "#7db8f7", position: "absolute", left: -5, fontSize: "9px", letterSpacing: "0.06em", cursor: "pointer" }}
-                                onClick={() => onFatalityFilterChange("all")}
-                            >
-                                RESET
-                            </span>
-                        )}
-                        <span>{selectedCity ? "Crash Type" : "Vision Zero Status"}</span>
-                    </div>
-                    {selectedCity ? (
-                        CRASH_LEGEND_ITEMS.map(({ key, color, label }) => (
-                            <LegendRow
-                                key={key}
-                                color={color}
-                                label={label}
-                                visible={fatalityFilter === "all" || fatalityFilter === key}
-                                onToggle={() => onFatalityFilterChange(fatalityFilter === key ? "all" : key)}
-                            />
-                        ))
-                    ) : (
-                        CITY_LEGEND_ITEMS.map(({ key, color, label }) => (
-                            <LegendRow
-                                key={key}
-                                color={color}
-                                label={label}
-                                visible={vzFilter.has(key)}
-                                onToggle={() => onVzFilterChange(key)}
-                            />
-                        ))
-                    )}
+            {selectedCity && (
+                <div className="map-history-control">
+                    <span className="map-years-indicator">
+                        {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
+                    </span>
+                    <button
+                        className="map-history-btn"
+                        onClick={handleLoadFullHistory}
+                        disabled={allYearsLoaded || pointsLoading}
+                    >
+                        {pointsLoading ? "Loading..." : allYearsLoaded ? "Full history loaded" : "Load full history"}
+                    </button>
                 </div>
+            )}
+            <div className="map-legend">
+                <div className="map-legend-title" style={{ position: "relative", textAlign: "center" }}>
+                    {selectedCity && fatalityFilter !== "all" && (
+                        <span
+                            style={{ color: "#7db8f7", position: "absolute", left: -5, fontSize: "9px", letterSpacing: "0.06em", cursor: "pointer" }}
+                            onClick={() => onFatalityFilterChange("all")}
+                        >
+                            RESET
+                        </span>
+                    )}
+                    <span>{selectedCity ? "Crash Type" : "Vision Zero Status"}</span>
+                </div>
+                {selectedCity ? (
+                    CRASH_LEGEND_ITEMS.map(({ key, color, label }) => (
+                        <LegendRow
+                            key={key}
+                            color={color}
+                            label={label}
+                            visible={fatalityFilter === "all" || fatalityFilter === key}
+                            onToggle={() => onFatalityFilterChange(fatalityFilter === key ? "all" : key)}
+                        />
+                    ))
+                ) : (
+                    CITY_LEGEND_ITEMS.map(({ key, color, label }) => (
+                        <LegendRow
+                            key={key}
+                            color={color}
+                            label={label}
+                            visible={vzFilter.has(key)}
+                            onToggle={() => onVzFilterChange(key)}
+                        />
+                    ))
+                )}
             </div>
             {selectedCrash && (
                 <div className="crash-overlay">

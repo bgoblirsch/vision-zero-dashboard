@@ -1,6 +1,6 @@
 .crash-overlay {
     position: absolute;
-    top: 24px;
+    top: 16px;
     left: 16px;
     background-color: rgba(15, 17, 23, 0.85);
     border: 1px solid #1e2535;
@@ -18,6 +18,10 @@
 }
 
 .map-legend {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    z-index: 10;
     background-color: rgba(15, 17, 23, 0.85);
     border: 1px solid #1e2535;
     border-radius: 6px;
@@ -65,27 +69,13 @@
     z-index: 90;
 }
 
-
-.map-bottom-left {
-    position: absolute;
-    bottom: 24px;
-    left: 16px;
-    z-index: 10;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    align-items: center;
-}
-
-.map-legend {
-    background-color: rgba(15, 17, 23, 0.85);
-    border: 1px solid #1e2535;
-    border-radius: 6px;
-    padding: 10px 14px;
-    backdrop-filter: blur(4px);
-}
-
 .map-history-control {
+    position: absolute;
+    width: fit-content;
+    bottom: 42px;
+    right: 16px;
+    width: 180px;
+    z-index: 10;
     background-color: rgba(15, 17, 23, 0.85);
     border: 1px solid #1e2535;
     border-radius: 6px;
