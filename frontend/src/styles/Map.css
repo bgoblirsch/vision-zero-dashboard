@@ -86,3 +86,53 @@
     backdrop-filter: blur(4px);
     font-size: 14px;
 }
+
+.map-controls {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    width: 32px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.map-control-btn {
+    background-color: rgba(15, 17, 23, 0.85);
+    border: 1px solid #1e2535;
+    border-radius: 6px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    font-size: 20px;
+    cursor: pointer;
+    color: #e2e8f0;
+    line-height: 1;
+    padding-bottom: 4px
+}
+
+.map-control-btn:hover {
+    background-color: #1a1f2e;
+    border-color: #2a3144;
+}
+
+.map-controls-zoom {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #1e2535;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.map-controls-zoom .map-control-btn {
+    border: none;
+    border-radius: 0;
+    border-bottom: 1px solid #1e2535;
+}
+
+.map-controls-zoom .map-control-btn:last-child {
+    border-bottom: none;
+}

@@ -13,8 +13,8 @@ import { fetchCityBoundary } from "../api/cities"
 import { FATALITY_COLORS, FATALITY_COLORS_RGB, VZ_COLORS, VZ_COLORS_RGB } from "../constants/colors"
 
 const CONT_US_BOUNDS = {
-    minLon: -125,
-    maxLon: -66,
+    minLon: -126,
+    maxLon: -67,
     minLat: 24,
     maxLat: 50,
 }
@@ -369,6 +369,13 @@ export default function CrashMap({
             >
                 <Map mapStyle={MAP_STYLE} />
             </DeckGL>
+            <div className="map-controls">
+                <button className="map-control-btn" onClick={() => setViewState(getInitialViewState())}>⌂</button>
+                <div className="map-controls-zoom">
+                <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom + 1 }))}>+</button>
+                <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom - 1 }))}>−</button>
+                </div>
+            </div>
             {selectedCity && (
                 <div className="map-history-control">
                     <span className="map-years-indicator">

@@ -25,7 +25,7 @@ export default function CityChart({ yearData, fatalityFilter }) {
 
     return (
         <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={yearData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
+            <LineChart key={fatalityFilter} data={yearData} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e2535" />
                 <XAxis
                     dataKey="year"
@@ -39,6 +39,7 @@ export default function CityChart({ yearData, fatalityFilter }) {
                     axisLine={false}
                     width={36}
                     allowDecimals={false}
+                    isAnimationActive={false}
                 />
                 <Tooltip
                     contentStyle={{
@@ -49,6 +50,7 @@ export default function CityChart({ yearData, fatalityFilter }) {
                         fontSize: "12px",
                         color: "#e2e8f0",
                     }}
+                    isAnimationActive={false}
                     labelStyle={{ color: "#9fa7b1", marginBottom: "4px" }}
                     itemSorter={(item) => item.dataKey === "total_fatalities" ? -1 : 0}
                 />
