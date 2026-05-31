@@ -12,6 +12,14 @@ export default function AboutModal() {
         if (!hidden) setOpen(true)
     }, [])
 
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") handleClose()
+        }
+        if (open) window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+    }, [open, hideOnLoad])
+
     const handleClose = () => {
         if (hideOnLoad) localStorage.setItem(STORAGE_KEY, "true")
         setOpen(false)
