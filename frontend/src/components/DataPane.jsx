@@ -17,6 +17,12 @@ const FATALITY_FILTERS = [
     { value: "cyclist",    label: "Cyclist" },
 ]
 
+const COLUMN_TOOLTIPS = {
+    avgFatalities: "Avg annual fatality count over the last 5 yrs",
+    perCapita: "Per capita avg annual fatality rate over the last 5 yrs",
+    trend: "% change in per-capita fatalities, current 5 yr avg vs prior 5 yr avg\nUses fixed 2023 ACS Population data",
+}
+
 function DataPane({
     cities,
     selectedCity,
@@ -191,9 +197,9 @@ function DataPane({
                                 <tr>
                                     <th>City</th>
                                     <th>VZ</th>
-                                    <th className="right" title="Avg annual fatality count over the last 5 yrs">Avg Fatalities</th>
-                                    <th className="right" title="Per capita avg annual fatality rate over the last 5 yrs">Per 100k</th>
-                                    <th className="right" title="% change in per-capita fatalities, current 5 yr avg vs prior 5 yr avg&#10;Uses fixed 2023 ACS Population data">Pct Change</th>
+                                                <th className="right" title="Avg annual fatality count over the last 5 yrs">Avg Fatalities</th>
+                                                <th className="right" title="Per capita avg annual fatality rate over the last 5 yrs">Per 100k</th>
+                                                <th className="right" title="% change in per-capita fatalities, current 5 yr avg vs prior 5 yr avg&#10;Uses fixed 2023 ACS Population data">Pct Change</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -254,13 +260,13 @@ function DataPane({
                                         City {sortField === "city" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
                                     </th>
                                     <th>VZ</th>
-                                    <th className="right sortable" onClick={() => handleSort("avgFatalities")} title="...">
+                                    <th className="right sortable" onClick={() => handleSort("avgFatalities")} title={COLUMN_TOOLTIPS.avgFatalities}>
                                         Avg Fatalities {sortField === "avgFatalities" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
                                     </th>
-                                    <th className="right sortable" onClick={() => handleSort("perCapita")} title="...">
+                                    <th className="right sortable" onClick={() => handleSort("perCapita")} title={COLUMN_TOOLTIPS.perCapita}>
                                         Per 100k {sortField === "perCapita" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
                                     </th>
-                                    <th className="right sortable" onClick={() => handleSort("trend")} title="...">
+                                    <th className="right sortable" onClick={() => handleSort("trend")} title={COLUMN_TOOLTIPS.trend}>
                                         Pct Change {sortField === "trend" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
                                     </th>
                                 </tr>
