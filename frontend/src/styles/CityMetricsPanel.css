@@ -1,45 +1,40 @@
 .metrics-panel {
-    padding: 16px 16px;
+    padding: 8px 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
 }
 
 .metric-section {
     display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    gap: 12px;
+    flex-direction: column;
     background-color: #1a1f2e;
     border: 1px solid #1e2535;
     border-radius: 4px;
     padding: 6px 16px;
 }
 
-.metric-section-left {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-    width: 140px;
-    flex-shrink: 0;
-    padding-right: 16px;
+.metric-section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9fa7b1;
 }
 
 .metric-section-ranks {
     display: flex;
-    flex: 1;
     gap: 12px;
-    border-left: 2px solid #bfc3ce;
-    padding-left: 16px;
 }
-
 .metric-section-label {
     display: block;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: #d1d6dc;
+}
+
+.metric-section-ranks.centered {
+    justify-content: center;
 }
 
 .metric-section-value {
@@ -60,10 +55,9 @@
 
 .rank-block {
     flex: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    width: 140px;
-    flex-shrink: 0;
     text-align: center;
 }
 
@@ -72,11 +66,10 @@
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: #d1d6dc;
-    margin-bottom: 2px;
 }
 
 .rank-block-rank {
-    font-size: 20px;
+    font-size: 16px;
     color: #f1f5f9;
     font-variant-numeric: tabular-nums;
 }

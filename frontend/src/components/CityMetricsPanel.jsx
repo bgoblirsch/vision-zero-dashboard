@@ -46,13 +46,7 @@ function MetricSection({
 }) {
     return (
         <div className="metric-section">
-            <div className="metric-section-left">
-                <span className="metric-section-label">{label}</span>
-                {isTrend
-                    ? <TrendIndicator slope={value} />
-                    : <span className="metric-section-value">{value ?? "—"}</span>
-                }
-            </div>
+            <div className="metric-section-label">{label}</div>
             <div className={`metric-section-ranks${!isVz ? " centered" : ""}`}>
                 <RankBlock
                     label="Among All Cities"
@@ -98,7 +92,6 @@ export default function CityMetricsPanel({
         <>
             <MetricSection
                 label="Per 100k Fatality Rate"
-                value={city[perCapitaKey]}
                 rankAll={city[rankPerCapitaKey]}
                 pctAll={city[pctPerCapitaKey]}
                 rankVz={city[rankPerCapitaKeyVz]}
@@ -110,7 +103,6 @@ export default function CityMetricsPanel({
             />
             <MetricSection
                 label="Trend (Pct&nbsp;Change)"
-                value={city[trendKey]}
                 rankAll={city[rankTrendKey]}
                 pctAll={city[pctTrendKey]}
                 rankVz={city[rankTrendKeyVz]}
@@ -119,7 +111,6 @@ export default function CityMetricsPanel({
                 isSmallPop={isSmallPop}
                 rankedCountAll={rankedTrendAll}
                 rankedCountVz={rankedTrendVz}
-                isTrend
             />
         </>
     )
