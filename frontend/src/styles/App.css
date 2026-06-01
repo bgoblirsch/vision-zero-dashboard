@@ -5,6 +5,7 @@
 html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
     overflow: hidden;
 }
 
@@ -12,4 +13,59 @@ html, body {
     width: 100vw;
     height: 100vh;
     overflow: hidden;
+}
+
+.app-layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.map-container {
+    position: relative;
+    flex: 1 1 50%;
+    min-height: 0;
+}
+
+.pane-container {
+    flex: 1 1 50%;
+    overflow-y: auto;
+    border-top: 1px solid #1e2535;
+    min-height: 0;
+    transition: flex-basis 0.3s ease;
+}
+
+.pane-container.sheet-open {
+    flex: 0 0 64%;
+}
+
+.pane-container.sheet-closed {
+    flex: 0 0 40px;
+    overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+    .app-layout {
+        flex-direction: row;
+    }
+
+    .map-container {
+        flex: 0 0 60%;
+        height: 100%;
+    }
+
+    .pane-container {
+        flex: 0 0 40%;
+        height: 100%;
+        border-top: none;
+        border-left: 1px solid #1e2535;
+        transition: none;
+    }
+
+    .pane-container.sheet-closed,
+    .pane-container.sheet-open {
+        flex: 0 0 40%;
+        overflow-y: auto;
+    }
 }

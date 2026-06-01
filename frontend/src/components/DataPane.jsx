@@ -33,8 +33,12 @@ function DataPane({
     onVzFilterChange,
     onCitySelect,
     onClearCity,
-    crashesMeta
+    crashesMeta,
+    isMobile,
+    sheetState,
+    onSheetStateChange
 }) {
+    console.log({isMobile})
     const [searchInput, setSearchInput] = useState("")
     const [searchQuery, setSearchQuery] = useState("")
     const [sortField, setSortField] = useState("population")
@@ -128,6 +132,16 @@ function DataPane({
 
     return (
         <div className="pane">
+        {isMobile && (
+            <div
+                className="sheet-handle"
+                onClick={() => onSheetStateChange(sheetState === "open" ? "closed" : "open")}
+            >
+                <div className="sheet-handle-pill">
+                    <span className={`sheet-handle-arrow ${sheetState === "open" ? "arrow-down" : "arrow-up"}`} />
+                </div>
+            </div>
+        )}
             <div className="pane-header">
                 <h1 className="pane-title">Vision Zero Dashboard</h1>
                 {view === "city" ? (

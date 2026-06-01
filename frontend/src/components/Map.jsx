@@ -1,5 +1,5 @@
 import "maplibre-gl/dist/maplibre-gl.css"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Map from "react-map-gl/maplibre"
 import DeckGL from "@deck.gl/react"
 import { GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers"
@@ -76,14 +76,11 @@ function getClusterExpansionViewState(clusterId, currentViewState) {
     return { ...currentViewState, longitude, latitude, zoom } 
 }
 
-function getInitialViewState() {
-    const { innerWidth, innerHeight } = window
+function getInitialViewState(width, height) {
     const lonRange = CONT_US_BOUNDS.maxLon - CONT_US_BOUNDS.minLon
     const latRange = CONT_US_BOUNDS.maxLat - CONT_US_BOUNDS.minLat
-
-    const mapWidth = innerWidth * 0.6
-    const zoomX = Math.log2(mapWidth / 256 * 360 / lonRange)
-    const zoomY = Math.log2(innerHeight / 256 * 180 / latRange)
+    const zoomX = Math.log2(width / 256 * 360 / lonRange)
+    const zoomY = Math.log2(height / 256 * 180 / latRange)
     const zoom = Math.min(zoomX, zoomY) - 1
     return {
         longitude: (CONT_US_BOUNDS.minLon + CONT_US_BOUNDS.maxLon) / 2,
@@ -93,7 +90,6 @@ function getInitialViewState() {
         bearing: 0,
     }
 }
-
 function LegendRow({ color, label, visible, onToggle }) {
     return (
         <div
@@ -126,11 +122,13 @@ export default function CrashMap({
     pointsLoading,
     maxYear,
 }) {
-    const [viewState, setViewState] = useState(getInitialViewState)
+    const [viewState, setViewState] = useState(() => {
+        return getInitialViewState(window.innerWidth * 0.6, window.innerHeight)
+    })
     const [cityBoundary, setCityBoundary] = useState(null)
     const [clusters, setClusters] = useState([])
 
-
+    const mapContainerRef = useRef(null)
 
     useEffect(() => {
         if (!cities.length) return
@@ -182,13 +180,13 @@ export default function CrashMap({
             .then(boundary => {
                 setCityBoundary(boundary)
                 const ext = getExtentFromGeometry(boundary.geometry)
-                const viewport = new WebMercatorViewport({
-                    width: window.innerWidth,
-                    height: window.innerHeight
-                })
+                const el = mapContainerRef.current
+                const w = el ? el.clientWidth : window.innerWidth
+                const h = el ? el.clientHeight : window.innerHeight
+                const viewport = new WebMercatorViewport({ width: w, height: h })
                 const { longitude, latitude, zoom } = viewport.fitBounds(
                     [[ext.min_lon, ext.min_lat], [ext.max_lon, ext.max_lat]],
-                    { padding: { left: 350, right: 350, top: 20, bottom: 20 } }
+                    { padding: { left: 40, right: 40, top: 20, bottom: 20 } }
                 )
                 setViewState(v => ({ ...v, longitude, latitude, zoom }))
             })
@@ -295,7 +293,7 @@ export default function CrashMap({
     ].filter(Boolean)
 
     return (
-        <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <div ref={mapContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
             <DeckGL
                 viewState={viewState}
                 onViewStateChange={({ viewState }) => setViewState(viewState)}

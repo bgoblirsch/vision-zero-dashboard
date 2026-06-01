@@ -1,7 +1,7 @@
 .pane {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%;
     background-color: #0f1117;
     color: #e2e8f0;
     font-family: 'DM Mono', 'Fira Mono', 'Courier New', monospace;
@@ -9,7 +9,7 @@
 }
  
 .pane-header {
-    padding: 12px 24px 12px;
+    padding: 12px 24px 6px;
     border-bottom: 1px solid #1e2535;
     flex-shrink: 0;
 }
@@ -22,7 +22,7 @@
     color: #f8fafc;
     margin: 0 0 4px 0;
     font-family: 'DM Mono', monospace;
-    margin: 4px 0px 16px;
+    margin: 4px 0px 8px;
 }
  
 .pane-subtitle {
@@ -271,6 +271,7 @@
     margin: 0 0 14px 0;
     cursor: pointer;
     letter-spacing: 0.02em;
+    line-height: 0.8;
 }
 
 .pane-breadcrumb:hover {
@@ -301,4 +302,23 @@
     border: 1px solid #2a3144;
     font-size: 9px;
     color: #9fa7b1;
+}
+
+/* Mobile sheet handler */
+.sheet-handle-arrow {
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #9fa7b1;
+    border-bottom: 2px solid #9fa7b1;
+    display: inline-block;
+}
+
+.sheet-handle-arrow.arrow-down {
+    transform: rotate(45deg);
+    margin-top: 16px;
+}
+
+.sheet-handle-arrow.arrow-up {
+    transform: rotate(-135deg);
+    margin-top: 16px;
 }
