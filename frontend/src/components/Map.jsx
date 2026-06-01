@@ -356,7 +356,10 @@ export default function CrashMap({
                     }
                 }}
             >
-                <Map mapStyle={MAP_STYLE} />
+                <Map 
+                    mapStyle={MAP_STYLE} 
+                    attributionControl={false}
+                />
             </DeckGL>
             <div className="map-controls">
                 <button className="map-control-btn" onClick={() => setViewState(getInitialViewState())}>⌂</button>
@@ -364,6 +367,11 @@ export default function CrashMap({
                 <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom + 1 }))}>+</button>
                 <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom - 1 }))}>−</button>
                 </div>
+            </div>
+            <div className="map-attribution">
+                <a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a>
+                {" "}© <a href="https://openmaptiles.org" target="_blank" rel="noreferrer">OpenMapTiles</a>
+                {" from "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OSM</a>
             </div>
             {selectedCity && (
                 <div className="map-history-control">

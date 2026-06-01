@@ -34,6 +34,7 @@ html, body {
     border-top: 1px solid #1e2535;
     min-height: 0;
     transition: flex-basis 0.3s ease;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .pane-container.sheet-open {
@@ -43,6 +44,8 @@ html, body {
 .pane-container.sheet-closed {
     flex: 0 0 40px;
     overflow: hidden;
+    flex: 0 0 calc(40px + env(safe-area-inset-bottom));
+
 }
 
 @media (min-width: 1024px) {
