@@ -66,6 +66,7 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 - FIPS backfill for pre-2001 non-spatial crash data
   - would allow the city chart history to span back to 1987
 - Motorcycle fatality breakout filter
+- Additional filter to exclude interstate/highway crashes from map and stat calculations since those are outside of municipal jurisdiction
 
 **Under Consideration**
 - Crash hotspot and corridor analysis

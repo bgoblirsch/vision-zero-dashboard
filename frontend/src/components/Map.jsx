@@ -159,7 +159,10 @@ export default function CrashMap({
 
         supercluster.load(points)
 
-        const viewport = new WebMercatorViewport(viewState)
+        const el = mapContainerRef.current
+        const w = el ? el.clientWidth : window.innerWidth
+        const h = el ? el.clientHeight : window.innerHeight
+        const viewport = new WebMercatorViewport({ ...viewState, width: w, height: h })
         const bounds = viewport.getBounds()
         const newClusters = supercluster.getClusters(
             [bounds[0], bounds[1], bounds[2], bounds[3]],
@@ -362,7 +365,9 @@ export default function CrashMap({
                 />
             </DeckGL>
             <div className="map-controls">
-                <button className="map-control-btn" onClick={() => setViewState(getInitialViewState())}>⌂</button>
+                <button className="map-control-btn" onClick={() => {
+                    setViewState(getInitialViewState(window.innerWidth * 0.6, window.innerHeight))
+                }}>⌂</button>
                 <div className="map-controls-zoom">
                 <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom + 1 }))}>+</button>
                 <button className="map-control-btn" onClick={() => setViewState(v => ({ ...v, zoom: v.zoom - 1 }))}>−</button>
