@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 
 import { useCityByYear } from "../hooks/useCityByYear"
 
@@ -26,7 +26,6 @@ const COLUMN_TOOLTIPS = {
 function DataPane({
     cities,
     selectedCity,
-    selectedCrash,
     view,
     fatalityFilter,
     vzFilter,
@@ -34,9 +33,12 @@ function DataPane({
     onVzFilterChange,
     onCitySelect,
     onClearCity,
-    cityStatsMeta,
-    crashesMeta
+    crashesMeta,
+    isMobile,
+    sheetState,
+    onSheetStateChange
 }) {
+    console.log({isMobile})
     const [searchInput, setSearchInput] = useState("")
     const [searchQuery, setSearchQuery] = useState("")
     const [sortField, setSortField] = useState("population")
@@ -130,6 +132,16 @@ function DataPane({
 
     return (
         <div className="pane">
+        {isMobile && (
+            <div
+                className="sheet-handle"
+                onClick={() => onSheetStateChange(sheetState === "open" ? "closed" : "open")}
+            >
+                <div className="sheet-handle-pill">
+                    <span className={`sheet-handle-arrow ${sheetState === "open" ? "arrow-down" : "arrow-up"}`} />
+                </div>
+            </div>
+        )}
             <div className="pane-header">
                 <h1 className="pane-title">Vision Zero Dashboard</h1>
                 {view === "city" ? (
@@ -234,7 +246,6 @@ function DataPane({
                                 pctTrendKey={pctTrendKey}
                                 rankTrendKeyVz={rankTrendKeyVz}
                                 pctTrendKeyVz={pctTrendKeyVz}
-                                cityStatsMeta={cityStatsMeta}
                                 rankedCountAll={rankedCountAll}
                                 rankedTrendAll={rankedTrendAll}
                                 rankedCountVz={rankedCountVz}
@@ -261,13 +272,13 @@ function DataPane({
                                     </th>
                                     <th>VZ</th>
                                     <th className="right sortable" onClick={() => handleSort("avgFatalities")} title={COLUMN_TOOLTIPS.avgFatalities}>
-                                        Avg Fatalities {sortField === "avgFatalities" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                                        <div>Avg Fatalities</div><div>{sortField === "avgFatalities" ? (sortDirection === "asc" ? "▲" : "▼") : ""}</div>
                                     </th>
                                     <th className="right sortable" onClick={() => handleSort("perCapita")} title={COLUMN_TOOLTIPS.perCapita}>
-                                        Per 100k {sortField === "perCapita" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                                        <div>Per 100k</div><div>{sortField === "perCapita" ? (sortDirection === "asc" ? "▲" : "▼") : ""}</div>
                                     </th>
                                     <th className="right sortable" onClick={() => handleSort("trend")} title={COLUMN_TOOLTIPS.trend}>
-                                        Pct Change {sortField === "trend" ? (sortDirection === "asc" ? "▲" : "▼") : ""}
+                                        <div>Pct Change</div> <div>{sortField === "trend" ? (sortDirection === "asc" ? "▲" : "▼") : ""}</div>
                                     </th>
                                 </tr>
                             </thead>

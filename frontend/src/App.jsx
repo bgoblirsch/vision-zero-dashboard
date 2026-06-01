@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useCrashPoints } from "./hooks/useCrashPoints"
 import { useCities } from "./hooks/useCities"
 import { useCrashesMeta } from "./hooks/useCrashesMeta"
+import { useIsMobile } from "./hooks/useIsMobile"
 
 import CrashMap from "./components/Map"
 import DataPane from "./components/DataPane"
@@ -16,6 +17,9 @@ function App() {
   const [dataPaneView, setDataPaneView] = useState("table") // table | city
   const [fatalityFilter, setFatalityFilter] = useState("all") // all | motorist | pedestrian | cyclist | other
   const [vzFilter, setVzFilter] = useState(new Set(["vz", "non-vz"]))
+  const [sheetState, setSheetState] = useState("open") // 
+
+  const isMobile = useIsMobile(1024)
 
   const { cities, loading: citiesLoading, error: citiesError } = useCities()
   const { meta: crashesMeta } = useCrashesMeta()
@@ -29,6 +33,7 @@ function App() {
     setSelectedCity(city)
     setSelectedCrash(null)
     setDataPaneView("city")
+    if (isMobile) setSheetState("open")
   }
 
   const handleClearCity = () => {
@@ -57,9 +62,14 @@ function App() {
   if (pointsError) return <p>Error: {pointsError}</p>
   if (citiesError) return <p>Error: {citiesError}</p>
 
+  const paneClasses = [
+      "pane-container",
+      isMobile ? `sheet-${sheetState}` : "",
+  ].filter(Boolean).join(" ")
+
   return (
-    <div style={{ display: "flex", width: "100vw", height: "100vh", overflow: "hidden" }}>
-      <div style={{ flex: "0 0 60%" }}>
+    <div className="app-layout">
+      <div className="map-container">
         <CrashMap
           crashPoints={crashPoints}
           onCrashSelect={setSelectedCrash}
@@ -79,7 +89,7 @@ function App() {
           maxYear={crashesMeta?.max_year}
         />
       </div>
-      <div style={{ flex: "0 0 40%", overflowY: "auto", borderLeft: "1px solid #e0e0e0" }}>
+      <div className={paneClasses}>
         <DataPane
           cities={cities}
           selectedCity={selectedCity}
@@ -92,6 +102,9 @@ function App() {
           onCitySelect={handleCitySelect}
           onClearCity={handleClearCity}
           crashesMeta={crashesMeta}
+          isMobile={isMobile}
+          sheetState={sheetState}
+          onSheetStateChange={setSheetState}
         />
       </div>
     </div>
