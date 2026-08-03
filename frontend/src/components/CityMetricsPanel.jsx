@@ -8,7 +8,9 @@ function RankBlock({ label, rank, pct, totalCities, isSmallPop }) {
 
     return (
         <div className="rank-block">
-            <div className="rank-block-label">{label}</div>
+            <div className="rank-block-label">
+                {label}
+            </div>
             {rank !== null && rank !== undefined ? (
                 <>
                     <div className="rank-block-rank">
@@ -16,12 +18,6 @@ function RankBlock({ label, rank, pct, totalCities, isSmallPop }) {
                     </div>
                     <div className="rank-block-pct">
                         better than {betterThan}% of cities
-                        {isSmallPop && (
-                            <span
-                                className="rank-stability-flag"
-                                title="Smaller population — rate estimates less stable"
-                            >~</span>
-                        )}
                     </div>
                 </>
             ) : (
@@ -46,7 +42,16 @@ function MetricSection({
 }) {
     return (
         <div className="metric-section">
-            <div className="metric-section-label">{label}</div>
+            <div className="metric-section-label">
+                {label}
+                {isSmallPop && (
+                    <span
+                        style={{ position: 'relative', top: '0.05em' }}
+                        className="rank-stability-flag"
+                        title="Smaller population — rankings less stable"
+                    >⚠️</span>
+                )}
+            </div>
             <div className={`metric-section-ranks${!isVz ? " centered" : ""}`}>
                 <RankBlock
                     label="Among All Cities"
