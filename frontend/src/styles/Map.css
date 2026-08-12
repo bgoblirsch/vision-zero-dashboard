@@ -19,21 +19,21 @@
 
 .map-legend {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    bottom: 4px;
+    left: 4px;
     z-index: 10;
     background-color: rgba(15, 17, 23, 0.85);
     border: 1px solid #1e2535;
     border-radius: 6px;
-    padding: 10px 14px;
+    padding: 4px 6px;
     backdrop-filter: blur(4px);
 }
 
 .map-legend-title {
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     font-family: 'DM Mono', monospace;
 }
 
@@ -42,7 +42,7 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 5px;
-    font-size: 12px;
+    font-size: 9px;
     color: #94a3b8;
     font-family: 'DM Mono', monospace;
 }
@@ -59,7 +59,7 @@
 }
 
 .map-legend-row svg {
-    margin-right: 8px;
+    margin-right: 4px;
     margin-left: 2px;
     flex-shrink: 0;
     color: #94a3b8;
@@ -70,21 +70,21 @@
 }
 
 .map-history-control {
-    position: absolute;
-    width: fit-content;
-    bottom: 42px;
-    right: 10px;
-    width: 180px;
-    z-index: 10;
-    background-color: rgba(15, 17, 23, 0.85);
-    border: 1px solid #1e2535;
-    border-radius: 6px;
-    padding: 8px 18px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    backdrop-filter: blur(4px);
-    font-size: 14px;
+    font-size: 10px;
+}
+
+.map-history-btn {
+    align-self: center;
+    font-size: 11px;
+    padding: 0px 4px;
+}
+
+.map-legend-divider {
+    height: 1.5px;
+    background-color: #94a3b8;
+    margin: 10px 0;
 }
 
 .map-controls {
@@ -107,11 +107,11 @@
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px);
-    font-size: 20px;
+    font-size: 12px;
     cursor: pointer;
     color: #e2e8f0;
     line-height: 1;
-    padding-bottom: 4px
+    padding-bottom: 4px;
 }
 
 .map-control-btn:hover {
@@ -145,7 +145,7 @@
     border-radius: 20px;
     padding: 0 6px;
     right: 8px;
-    font-size: 10px;
+    font-size: 7px;
     color: #373c41;
     z-index: 10;
     font-family: 'DM Mono', monospace;
@@ -158,4 +158,49 @@
 
 .map-attribution a:hover {
     color: #e2e8f0;
+}
+
+@media (min-width: 1024px) {
+    .map-legend-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 5px;
+        font-size: 12px;
+    }
+
+    .map-legend {
+        bottom: 10px;
+        left: 10px;
+        padding: 10px 14px;
+    }
+
+    .map-legend-title {
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        font-family: 'DM Mono', monospace;
+    }
+
+    .map-attribution {
+        font-size: 10px;
+    }
+
+    .map-history-control {
+        font-size: 10px;
+    }
+
+    .map-history-btn {
+        font-size: 12px;
+    }
+
+    .map-history-control {
+        font-size: 10px;
+    }
+
+    .map-control-btn {
+        font-size: 20px;
+    }
+
 }

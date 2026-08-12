@@ -11,7 +11,7 @@ html, body {
 
 #root {
     width: 100vw;
-    height: 100vh;
+    height: 100svh;
     overflow: hidden;
 }
 
@@ -42,10 +42,8 @@ html, body {
 }
 
 .pane-container.sheet-closed {
-    flex: 0 0 40px;
-    overflow: hidden;
     flex: 0 0 calc(40px + env(safe-area-inset-bottom));
-
+    overflow: hidden;
 }
 
 @media (min-width: 1024px) {
