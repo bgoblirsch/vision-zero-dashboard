@@ -5,11 +5,11 @@ import booleanPointInPolygon from "@turf/boolean-point-in-polygon"
 import "../styles/Map.css"
 import EyeIcon from "./EyeIcon"
 import { fetchCityBoundary } from "../api/cities"
-import { FATALITY_COLORS, FATALITY_COLORS_RGB, VZ_COLORS, VZ_COLORS_RGB } from "../constants/colors"
+import { FATALITY_COLORS, VZ_COLORS } from "../constants/colors"
 
 const HERE_API_KEY = import.meta.env.VITE_HERE_API_KEY
 
-const CONT_US_CENTER = { lat: 39, lng: -98 } // rough geographic center of continental US
+const CONT_US_CENTER = { lat: 39, lng: -98 }
 const INITIAL_ZOOM = 4
 
 const CITY_LEGEND_ITEMS = [
@@ -55,26 +55,6 @@ function clusterIcon(count, radiusPx = 14) {
         size: { w: size, h: size },
         anchor: { x: radiusPx, y: radiusPx },
     })
-}
-
-function getExtentFromGeometry(geometry) {
-    const coords = []
-    const collect = (geom) => {
-        if (geom.type === "Polygon") {
-            geom.coordinates[0].forEach(c => coords.push(c))
-        } else if (geom.type === "MultiPolygon") {
-            geom.coordinates.forEach(poly => poly[0].forEach(c => coords.push(c)))
-        }
-    }
-    collect(geometry)
-    const lons = coords.map(c => c[0])
-    const lats = coords.map(c => c[1])
-    return {
-        min_lon: Math.min(...lons),
-        max_lon: Math.max(...lons),
-        min_lat: Math.min(...lats),
-        max_lat: Math.max(...lats),
-    }
 }
 
 export default function CrashMap({ 
@@ -147,13 +127,11 @@ export default function CrashMap({
             }
         )
 
+        // add native zoom controls and attribution
         uiRef.current = window.H.ui.UI.createDefault(hMap, defaultLayers)
         
         // add map interaction behavior (zoom, pan, etc.)
         new window.H.mapevents.Behavior(new window.H.mapevents.MapEvents(hMap))
-
-        // add native zoom controls and attribution
-        window.H.ui.UI.createDefault(hMap, defaultLayers)
 
         hereMapRef.current = hMap
 
@@ -165,8 +143,14 @@ export default function CrashMap({
         const handleResize = () => hMap.getViewPort().resize()
         window.addEventListener("resize", handleResize)
 
+        const resizeObserver = new ResizeObserver(() => {
+            hMap.getViewPort().resize()
+        })
+        resizeObserver.observe(hereMapDivRef.current)
+
         return () => {
             window.removeEventListener("resize", handleResize)
+            resizeObserver.disconnect()
             hMap.dispose()
         }
     }, [])
@@ -206,7 +190,6 @@ export default function CrashMap({
                     icon: city?.is_vision_zero ? icons.vz : icons.nonVz,
                     min: noisePoint.getMinZoom(),
                 })
-                noiseMarker.title = city?.display_name
                 noiseMarker.setData(city)
                 noiseMarker.__isCityMarker = true
 
@@ -334,12 +317,13 @@ export default function CrashMap({
         return () => hMap.removeEventListener("tap", handleBackgroundTap)
     }, [selectedCity, cityBoundary, onClearCity])
 
+    // handle adding/removing crash points layer
     useEffect(() => {
         const hMap = hereMapRef.current
         if (!hMap) return
 
         if (crashPointsGroupRef.current) {
-            hMap.removeObject(crashPointsGroupRef.current) // Group extends H.map.Object, so removeObject is correct here (unlike the boundary layer)
+            hMap.removeObject(crashPointsGroupRef.current)
             crashPointsGroupRef.current = null
         }
 

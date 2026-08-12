@@ -71,6 +71,8 @@
 
 .map-history-btn {
     cursor: pointer;
+    align-self: center;
+    padding: 0px 6px;
 }
 
 .map-history-control {
@@ -82,8 +84,8 @@
 }
 
 .map-legend-divider {
-    height: 1px;
-    background-color: #fcfcfc;
+    height: 1.5px;
+    background-color: #94a3b8;
     margin: 10px 0;
 }
 
