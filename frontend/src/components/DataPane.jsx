@@ -38,7 +38,6 @@ function DataPane({
     sheetState,
     onSheetStateChange
 }) {
-    console.log({isMobile})
     const [searchInput, setSearchInput] = useState("")
     const [searchQuery, setSearchQuery] = useState("")
     const [sortField, setSortField] = useState("population")
