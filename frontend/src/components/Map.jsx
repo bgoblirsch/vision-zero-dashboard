@@ -378,21 +378,24 @@ export default function CrashMap({
                 {" "}© <a href="https://openmaptiles.org" target="_blank" rel="noreferrer">OpenMapTiles</a>
                 {" from "}<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OSM</a>
             </div>
-            {selectedCity && (
-                <div className="map-history-control">
-                    <span className="map-years-indicator">
-                        {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
-                    </span>
-                    <button
-                        className="map-history-btn"
-                        onClick={handleLoadFullHistory}
-                        disabled={allYearsLoaded || pointsLoading}
-                    >
-                        {pointsLoading ? "Loading..." : allYearsLoaded ? "Full history loaded" : "Load full history"}
-                    </button>
-                </div>
-            )}
             <div className="map-legend">
+                {selectedCity && (
+                    <>
+                        <div className="map-history-control">
+                            <span className="map-years-indicator">
+                                {allYearsLoaded ? `2001–${maxYear}` : `${Math.min(...loadedYears)}–${maxYear}`}
+                            </span>
+                            <button
+                                className="map-history-btn"
+                                onClick={handleLoadFullHistory}
+                                disabled={allYearsLoaded || pointsLoading}
+                            >
+                                {pointsLoading ? "Loading..." : allYearsLoaded ? "Full history loaded" : "Load full history"}
+                            </button>
+                        </div>
+                        <div className="map-legend-divider" />
+                    </>
+                )}
                 <div className="map-legend-title" style={{ position: "relative", textAlign: "center" }}>
                     {selectedCity && fatalityFilter !== "all" && (
                         <span
