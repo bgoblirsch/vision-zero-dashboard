@@ -84,6 +84,15 @@ export default function CrashMap({
     const [cityBoundary, setCityBoundary] = useState(null)
     const boundaryRef = useRef(null)
     const crashPointsGroupRef = useRef(null)
+    const crashIconsRef = useRef(null)
+    
+    if (!crashIconsRef.current) {
+        crashIconsRef.current = {
+            motorist: circleIcon(FATALITY_COLORS.motorist, 7),
+            pedestrian: circleIcon(FATALITY_COLORS.pedestrian, 7),
+            cyclist: circleIcon(FATALITY_COLORS.cyclist, 7),
+        }
+    }
 
     const remainingYears = maxYear
         ? Array.from(
@@ -329,17 +338,25 @@ export default function CrashMap({
 
         if (!selectedCity || !crashPoints?.length) return
 
+        if (!crashIconsRef.current) {
+            crashIconsRef.current = {
+                motorist: circleIcon(FATALITY_COLORS.motorist, 7),
+                pedestrian: circleIcon(FATALITY_COLORS.pedestrian, 7),
+                cyclist: circleIcon(FATALITY_COLORS.cyclist, 7),
+            }
+        }
+
         const filteredCrashPoints = fatalityFilter === "all"
             ? crashPoints
             : crashPoints.filter(d => d[`${fatalityFilter}_fatalities`] > 0)
 
-        const getColor = (d) => {
-            if (fatalityFilter === "pedestrian") return FATALITY_COLORS.pedestrian
-            if (fatalityFilter === "cyclist")    return FATALITY_COLORS.cyclist
-            if (fatalityFilter === "motorist")   return FATALITY_COLORS.motorist
-            if (d.pedestrian_fatalities > 0)     return FATALITY_COLORS.pedestrian
-            if (d.cyclist_fatalities > 0)        return FATALITY_COLORS.cyclist
-            return FATALITY_COLORS.motorist
+        const getFatalityType = (d) => {
+            if (fatalityFilter === "pedestrian") return "pedestrian"
+            if (fatalityFilter === "cyclist")    return "cyclist"
+            if (fatalityFilter === "motorist")   return "motorist"
+            if (d.pedestrian_fatalities > 0)     return "pedestrian"
+            if (d.cyclist_fatalities > 0)        return "cyclist"
+            return "motorist"
         }
 
         const crashPointGroup = new window.H.map.Group()
@@ -347,7 +364,7 @@ export default function CrashMap({
         filteredCrashPoints.forEach(d => {
             const marker = new window.H.map.Marker(
                 { lat: d.lat, lng: d.lon },
-                { icon: circleIcon(getColor(d), 7) }
+                { icon: crashIconsRef.current[getFatalityType(d)] }
             )
             marker.setData(d)
             marker.__isCityMarker = true
