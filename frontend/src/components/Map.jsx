@@ -277,6 +277,7 @@ export default function CrashMap({
             hMap.addLayer(layer)
             boundaryRef.current = layer
 
+            // zoom to the city boundary when the reader is ready
             reader.addEventListener("statechange", () => {
                 if (reader.getState() !== window.H.data.AbstractReader.State.READY) return
 
@@ -326,7 +327,11 @@ export default function CrashMap({
         return () => hMap.removeEventListener("tap", handleBackgroundTap)
     }, [selectedCity, cityBoundary, onClearCity])
 
-    // handle adding/removing crash points layer
+    // Handle adding/removing crash points layer
+    //    Rebuilds the full marker set on every crashPoints/fatalityFilter change rather than
+    //    diffing and incrementally adding/toggling. Confirmed acceptable at current scale
+    //    (Houston, ~6.5k points, full history: no perceptible lag).
+    //    Acceptable for this exploratory demo, but needs improvement if ever revisited !!!
     useEffect(() => {
         const hMap = hereMapRef.current
         if (!hMap) return
