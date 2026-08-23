@@ -4,9 +4,9 @@
 
 A full-stack data engineering project that ingests, normalizes, and analyzes U.S. traffic fatality data in support of [Vision Zero](https://visionzeronetwork.org/) style safety analysis for large cities. 
 
-Includes a custom interactive dashboard built FARS data, featuring per-capita fatality rates, trend analysis, and cross city rankings for U.S. cities with a population greater than 100,000 and all Vision Zero cities. 
+Includes a custom interactive dashboard built using data from the Fatality Analysis Reporting System (FARS) that is published by the National Highway Traffic Safety Administration. It features per-capita fatality rates, trend analysis, and cross city rankings for U.S. cities with a population greater than 100,000 and all Vision Zero cities. 
 
-Designed to help advocates, researchers, and policymakers track city-level progress, identify where Vision Zero commitments aren't being met, and surface crash patterns for deeper safety analysis.
+Designed to identify where Vision Zero commitments aren't being met, and surface crash patterns for deeper safety analysis.
 
 ## About Vision Zero
 Vision Zero is a road safety initiative, originating in Sweden, built on the principle that traffic deaths and serious injuries are preventable, not inevitable. Cities that adopt Vision Zero make a formal commitment to eliminating traffic fatalities through infrastructure improvements, policy changes, and data-driven analysis.
