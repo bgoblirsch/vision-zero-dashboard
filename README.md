@@ -60,16 +60,16 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 - Cross-city rankings with Vision Zero peer comparisons
 - Interactive dashboard with map, city detail view, and fatality type filters
 - Static Deployment: Cloudflare R2 serves static JSON data
+- Mobile friendly view
 
 **Planned**
-- Mobile version
 - FIPS backfill for pre-2001 non-spatial crash data
   - would allow the city chart history to span back to 1987
 - Motorcycle fatality breakout filter
 - Additional filter to exclude interstate/highway crashes from map and stat calculations since those are outside of municipal jurisdiction
 
 **Under Consideration**
-- Crash hotspot and corridor analysis
+- Crash hotspot and corridor analysis (ongoing development on the "feature/hotspot-analysis" branch)
 - Incorporate annual population data for more accurate per capita calculations
   - Currently uses a 1-year snapshot for the per capita calculation
 - Include Puerto Rico crash data
@@ -267,10 +267,6 @@ ENV=local bash scripts/reset_city_tables.sh
 
 ## Notes
 
-- This project is under active development.
-
 - Schemas, interfaces, and assumptions may evolve as additional validation and analysis layers are added.
 
-- Raw FARS data is not included in this repository.
-
-- FastAPI backend archived in v0.1.0 release; can be revived if the project expands to justify full backend hosting.
+- FastAPI backend archived in v0.1.0 release; can be revived if the project expands to justify hosting a full backend.
