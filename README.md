@@ -87,11 +87,11 @@ Vision Zero is a road safety initiative, originating in Sweden, built on the pri
 The pipeline uses an ETL pattern for ingestion, applying lightweight transforms inline during load, followed by post-load SQL transformations to derive city statistics and rankings, then exports pre-generated static JSON files uploaded to Cloudflare R2. The React frontend reads directly from R2 — there is no backend server.
 
 ### R2 Static file shape
-crashes_metadata.json
-cities.json
-cities/{state_fips}/{place_fips}/annual_fatalities.json
-cities/{state_fips}/{place_fips}/boundary.geojson
-crashes/{state_fips}/{place_fips}/{year}.json
+- crashes_metadata.json
+- cities.json
+- cities/{state_fips}/{place_fips}/annual_fatalities.json
+- cities/{state_fips}/{place_fips}/boundary.geojson
+- crashes/{state_fips}/{place_fips}/{year}.json
 
 ### Pipelines
 
